@@ -15,7 +15,14 @@ git commit -m “commit-message”
 git push origin {branch-kalian}
 ```
 
-2. Buat database Postgres
+2. Aktifkan env dan install dependency
+```bash 
+python -m venv env
+env\Scripts\activate
+pip install -r requirements.txt
+```
+
+3. Buat database Postgres
 ```bash
 -- Create the database
 CREATE DATABASE health_mate;
@@ -131,7 +138,7 @@ INSERT INTO DOCTOR (First_Name, Last_Name, Sex, Phone, Address, Password, Birthd
     '$2y$10$9012yzab3456cdefghij', '1982-01-30', 'Pediatrics', 8);
 ```
 
-3. Setting Postgres ke Django
+4. Setting Postgres ke Django
 - buat file `.env`
 isinya: 
 ```bash
@@ -146,7 +153,7 @@ DB_PORT=5432
 cara dapetin secret_key, copas dibawah di terminal
 `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`
 
-4. Done, kalian udh bisa coba run n login pake dummy data yang udah dibuat tadi
+5. Done, kalian udh bisa coba run n login pake dummy data yang udah dibuat tadi
 contoh input login:
 Phone Number: 081122334455
 Password : $2y$10$abcd1234efgh5678ijkl
