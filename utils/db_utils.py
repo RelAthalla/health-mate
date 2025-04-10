@@ -1,29 +1,24 @@
 import psycopg2
-from django.conf import settings
+import os
+from dotenv import load_dotenv
 
+load_dotenv()  
 def get_db_connection():
-    return psycopg2.connect(
-        dbname=settings.DATABASES['default']['NAME'],
-        user=settings.DATABASES['default']['USER'],
-        password=settings.DATABASES['default']['PASSWORD'],
-        host=settings.DATABASES['default']['HOST'],
-        port=settings.DATABASES['default']['PORT']
+    
+    # Get database credentials from environment variables
+    db_name = os.environ.get("DB_NAME")
+    db_user = os.environ.get("DB_USER")
+    db_password = os.environ.get("DB_PASSWORD")
+    db_host = os.environ.get("DB_HOST")
+    db_port = os.environ.get("DB_PORT")
+
+    # Establish a connection to the database
+    connection = psycopg2.connect(
+        dbname=db_name,
+        user=db_user,
+        password=db_password,
+        host=db_host,
+        port=db_port
     )
 
-def execute_query(query, params=None, fetch_one=False):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute(query, params or ())
-        if fetch_one:
-            result = cursor.fetchone()
-        else:
-            result = cursor.fetchall()
-        conn.commit()
-        return result
-    except Exception as e:
-        conn.rollback()
-        raise e
-    finally:
-        cursor.close()
-        conn.close()
+    return connection

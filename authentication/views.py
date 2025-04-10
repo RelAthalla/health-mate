@@ -1,68 +1,101 @@
+import psycopg2
+from utils.db_utils import get_db_connection
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.http import JsonResponse
-from utils.db_utils import execute_query
+from django.views.decorators.http import require_http_methods
 
-def patient_login(request):
+
+@require_http_methods(['GET'])
+def home(request):
+    # if request.session.get('phone') is not None:
+    #     return redirect('authentication:home')
+    return render(request, 'home.html')
+
+@require_http_methods(['GET', 'POST'])
+def login(request):
     if request.method == 'POST':
-        phone = request.POST.get('phone')
-        password = request.POST.get('password')
-        
-        # Check patient credentials
-        query = "SELECT * FROM patient WHERE phone = %s AND password = %s"
-        patient = execute_query(query, (phone, password), fetch_one=True)
-        
-        if patient:
-            # Create user session
-            request.session['user_type'] = 'patient'
-            request.session['user_id'] = patient[0]  # patient_id
-            request.session['name'] = patient[3]     # name field
-            return redirect('patient_dashboard')
-        else:
-            messages.error(request, 'Invalid phone number or password')
+        phone = request.POST['phone']
+        password = request.POST['password']
+        role = request.POST['role']
     
-    return render(request, 'patient_login.html')
+        try:
+            connection = get_db_connection()
+            cursor = connection.cursor()
+            # patient
+            if role == 'patient':
+                cursor.execute("SELECT * FROM patient WHERE phone = %s AND password = %s", (phone, password))
+            elif role == 'doctor':
+                cursor.execute("SELECT * FROM doctor WHERE phone = %s AND password = %s", (phone, password))
+            elif role == 'admin':
+                cursor.execute("SELECT * FROM admin WHERE phone = %s AND password = %s", (phone, password))
+            else:
+                messages.error(request, 'Invalid role')
+                return redirect('authentication:login')
 
-def doctor_login(request):
+            user = cursor.fetchone()
+
+            if user is not None:
+                request.session['phone'] = user[0]
+                return redirect('authentication:home')
+            else:
+                messages.error(request, 'phone or password is incorrect')
+                return redirect('authentication:login')
+
+        except psycopg2.Error as e:
+            print(e)
+            return HttpResponse("Error occurred while connecting to the database")
+
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
+
+    else:
+        return render(request, 'login.html')
+
+
+@require_http_methods(['GET', 'POST'])
+def register(request):
     if request.method == 'POST':
-        phone = request.POST.get('phone')
-        password = request.POST.get('password')
-        
-        # Check doctor credentials
-        query = "SELECT * FROM doctor WHERE phone = %s AND password = %s"
-        doctor = execute_query(query, (phone, password), fetch_one=True)
-        
-        if doctor:
-            request.session['user_type'] = 'doctor'
-            request.session['user_id'] = doctor[0]  # doctor_id
-            request.session['name'] = doctor[3]     # name field
-            return redirect('doctor_dashboard')
-        else:
-            messages.error(request, 'Invalid phone number or password')
-    
-    return render(request, 'doctor_login.html')
+        phone = request.POST['phone']
+        password = request.POST['password']
+        role = request.POST['role']
 
-def admin_login(request):
-    if request.method == 'POST':
-        phone = request.POST.get('phone')
-        password = request.POST.get('password')
-        
-        # Check admin credentials
-        query = "SELECT * FROM admin WHERE phone = %s AND password = %s"
-        admin = execute_query(query, (phone, password), fetch_one=True)
-        
-        if admin:
-            request.session['user_type'] = 'admin'
-            request.session['user_id'] = admin[0]  # admin_id
-            request.session['name'] = admin[3]     # name field
-            return redirect('admin_dashboard')
-        else:
-            messages.error(request, 'Invalid phone number or password')
-    
-    return render(request, 'admin_login.html')
+        try:
+            connection = get_db_connection()
 
-def logout_view(request):
-    logout(request)
+            cursor = connection.cursor()
+            if role == 'patient':
+                cursor.execute("INSERT INTO patient (phone, password) VALUES (%s, %s, %s)", (phone, password))
+            elif role == 'doctor': 
+                cursor.execute("INSERT INTO doctor (phone, password) VALUES (%s, %s, %s)", (phone, password))
+            elif role == 'admin':
+                cursor.execute("INSERT INTO admin (phone, password) VALUES (%s, %s, %s)", (phone, password))
+                
+            connection.commit()
+
+            messages.success(request, 'Registration successful. Please login.')
+            return redirect('authentication:login')
+
+        except psycopg2.Error as e:
+            if e.pgcode == 'P0001':
+                messages.error(request, e.diag.message_primary)
+                return redirect('register')
+            else:
+                print(e)
+                return HttpResponse("Error occurred while connecting to the database")
+
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
+
+    else:
+        return render(request, 'register.html')
+
+
+@require_http_methods(['GET'])
+def logout(request):
     request.session.flush()
     return redirect('home')
