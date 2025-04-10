@@ -1,3 +1,6 @@
 django
 gunicorn
-psycopg2-binary  # Jika menggunakan PostgreSQL
+psycopg2-binary
+python-decouple
+utils
+db_utils
