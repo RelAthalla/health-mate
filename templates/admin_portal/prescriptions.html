@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Janji Temu - HealthMate{% endblock %}
+{% block title %}Resep Pasien - HealthMate{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -12,7 +12,7 @@
         margin-bottom: 30px;
     }
 
-    .appointments-card {
+    .prescription-card {
         background-color: white;
         border-radius: 10px;
         box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
@@ -31,61 +31,48 @@
         color: var(--primary-color);
     }
 
-    .appointment-item {
+    .prescription-item {
         padding: 15px 20px;
         border-bottom: 1px solid #eee;
         transition: all 0.3s ease;
     }
 
-    .appointment-item:last-child {
+    .prescription-item:last-child {
         border-bottom: none;
     }
 
-    .appointment-item:hover {
+    .prescription-item:hover {
         background-color: rgba(52, 152, 219, 0.05);
     }
 
-    .appointment-header {
+    .prescription-header {
         display: flex;
         justify-content: space-between;
         margin-bottom: 10px;
     }
 
-    .appointment-id {
+    .prescription-id {
         font-weight: 600;
         color: var(--primary-color);
     }
 
-    .appointment-date {
+    .prescription-date {
         color: #777;
         font-size: 0.9rem;
     }
 
-    .appointment-body {
+    .prescription-body {
         margin-top: 5px;
     }
 
-    .appointment-status {
-        display: inline-block;
-        padding: 4px 12px;
-        font-size: 0.85rem;
-        border-radius: 20px;
+    .prescription-medicine {
         font-weight: 500;
+        margin-bottom: 5px;
     }
 
-    .status-completed {
-        background-color: rgba(46, 204, 113, 0.1);
-        color: #2ecc71;
-    }
-
-    .status-pending {
-        background-color: rgba(243, 156, 18, 0.1);
-        color: #f39c12;
-    }
-
-    .status-cancelled {
-        background-color: rgba(231, 76, 60, 0.1);
-        color: #e74c3c;
+    .prescription-notes {
+        color: #555;
+        font-size: 0.95rem;
     }
 
     .empty-state {
@@ -115,34 +102,34 @@
 <div class="container py-5">
     <!-- Page Header -->
     <div class="page-header">
-        <h2><i class="fas fa-calendar-check me-2"></i>Janji Temu</h2>
-        <p class="mb-0">Daftar seluruh janji temu pasien dan dokter</p>
+        <h2><i class="fas fa-prescription-bottle-alt me-2"></i>Resep Pasien</h2>
+        <p class="mb-0">Daftar seluruh resep yang telah dikeluarkan oleh dokter untuk pasien HealthMate</p>
     </div>
 
-    <!-- Appointments Card -->
-    <div class="appointments-card">
+    <!-- Prescriptions Card -->
+    <div class="prescription-card">
         <div class="card-header">
-            <h5><i class="fas fa-user-clock me-2"></i>Daftar Janji Temu</h5>
+            <h5><i class="fas fa-clipboard-list me-2"></i>Daftar Resep</h5>
         </div>
 
-        {% if appointments %}
-            {% for appt in appointments %}
-                <div class="appointment-item">
-                    <div class="appointment-header">
-                        <div class="appointment-id">#{{ appt.appointment_id }} - {{ appt.patient_name }}</div>
-                        <div class="appointment-date">{{ appt.date|date:"d F Y" }} | {{ appt.time|time:"H:i" }}</div>
+        {% if prescriptions %}
+            {% for pr in prescriptions %}
+                <div class="prescription-item">
+                    <div class="prescription-header">
+                        <div class="prescription-id">#{{ pr.prescription_id }} - {{ pr.patient_name }}</div>
+                        <div class="prescription-date">{{ pr.date|date:"d F Y" }}</div>
                     </div>
-                    <div class="appointment-body">
-                        <div>Dokter: <strong>{{ appt.doctor_name }}</strong></div>
-                        <div>Spesialisasi: {{ appt.specialization|default:"-" }}</div>
+                    <div class="prescription-body">
+                        <div class="prescription-medicine">Obat: {{ pr.medicine }}</div>
+                        <div class="prescription-notes">Catatan: {{ pr.notes|default:"-" }}</div>
                     </div>
                 </div>
             {% endfor %}
         {% else %}
             <div class="empty-state">
-                <i class="fas fa-calendar-times"></i>
-                <h5>Tidak Ada Janji Temu</h5>
-                <p>Belum ada janji temu yang tercatat dalam sistem.</p>
+                <i class="fas fa-prescription-bottle-alt"></i>
+                <h5>Tidak Ada Resep</h5>
+                <p>Belum ada resep yang tercatat dalam sistem.</p>
             </div>
         {% endif %}
     </div>

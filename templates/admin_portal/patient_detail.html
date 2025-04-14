@@ -364,12 +364,12 @@
                                             {% if bill.amount > 0 %}
                                                 +Rp {{ bill.amount|floatformat:0 }}
                                             {% else %}
-                                                -Rp {{ bill.amount|abs|floatformat:0 }}
+                                                Rp {{ bill.amount|floatformat:0 }}
                                             {% endif %}
                                         </p>
                                     </div>
                                 </div>
-                            </div>
+                            </div>x
                         {% endfor %}
                     {% else %}
                         <div class="alert alert-info">
