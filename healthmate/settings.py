@@ -42,6 +42,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.UserTypeMiddleware',  # Custom middleware to identify user type
+    'utils.audit_log_middleware.AuditLogMiddleware',  # Middleware untuk audit log
 ]
 
 ROOT_URLCONF = 'healthmate.urls'

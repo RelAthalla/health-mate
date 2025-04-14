@@ -104,6 +104,17 @@ CREATE TABLE bill (
     amount DECIMAL(10, 2)
 );
 
+-- Create AUDIT LOG table
+CREATE TABLE IF NOT EXISTS audit_log (
+    log_id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    user_role VARCHAR(20) NOT NULL,
+    action VARCHAR(100) NOT NULL,
+    timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ip_address VARCHAR(45),
+    details TEXT
+);
+
 -- ====================
 -- Dummy Data: ADMIN
 -- ====================
@@ -136,6 +147,22 @@ INSERT INTO DOCTOR (First_Name, Last_Name, Sex, Phone, Address, Password, Birthd
     '$2y$10$5678mnop1234qrstuvwx', '1978-09-11', 'Dermatology', 10),
 ('Dr. Eko',  'Santoso',  'M', '081177889900', 'Jl. Klinik No. 10, Surabaya', 
     '$2y$10$9012yzab3456cdefghij', '1982-01-30', 'Pediatrics', 8);
+
+-- ====================
+-- Dummy Data: AUDIT LOG
+-- ====================
+INSERT INTO audit_log (user_id, user_role, action, ip_address, details)
+VALUES 
+-- Patient Andi Wijaya (user_id: 1)
+(1, 'patient', 'login', '192.168.1.100', 'Path: /auth/login, Method: POST'),
+(1, 'patient', 'view_profile', '192.168.1.100', 'Path: /patient/profile, Method: GET'),
+
+-- Doctor Dr. Lina Setiawan (user_id: 2)
+(2, 'doctor', 'login', '192.168.0.101', 'Path: /auth/login, Method: POST'),
+(2, 'doctor', 'access_doctor_dashboard', '192.168.0.101', 'Path: /doctor/dashboard, Method: GET'),
+
+-- Admin Rina Saputra (user_id: 1 in admin table)
+(1, 'admin', 'login', '192.168.0.50', 'Path: /auth/login, Method: POST');
 ```
 
 4. Setting Postgres ke Django
