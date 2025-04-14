@@ -111,7 +111,9 @@ def get_admin(admin_id):
         return dictfetchone(cursor)
 
 # Appointment related DB functions
-def create_appointment(patient_id, doctor_id, date, time):
+from django.db import connection
+
+def create_appointment(patient_id, doctor_id, date, time, appointment_fee):
     with connection.cursor() as cursor:
         # Get doctor details
         cursor.execute(
@@ -134,7 +136,23 @@ def create_appointment(patient_id, doctor_id, date, time):
             [patient_id, doctor_id, doctor_info['name'], doctor_info['specialization'], date, time]
         )
         result = cursor.fetchone()
-        return result[0] if result else None
+        
+        if result:
+            appointment_id = result[0]
+            
+            # Create bill and link it to the new appointment
+            cursor.execute(
+                """
+                INSERT INTO bill (patient_id, date, time, amount, status, appointment_id)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                """,
+                [patient_id, date, time, appointment_fee, 'Unpaid', appointment_id]
+            )
+            return appointment_id  # Return the appointment_id if everything is successful
+        else:
+            return None
+
+
 
 def get_patient_appointments(patient_id):
     with connection.cursor() as cursor:
