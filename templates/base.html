@@ -149,7 +149,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    {% if user_type == 'patient' %}
+                    {% if request.session.user_type == 'patient' %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'patient_dashboard' %}">
                                 <i class="fas fa-home me-1"></i> Dashboard
@@ -175,7 +175,7 @@
                                 <i class="fas fa-user-circle me-1"></i> {{ request.session.user_name }}
                             </a>
                         </li>
-                    {% elif user_type == 'doctor' %}
+                    {% elif request.session.user_type == 'doctor' %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'doctor_dashboard' %}">
                                 <i class="fas fa-home me-1"></i> Dashboard
@@ -196,7 +196,7 @@
                                 <i class="fas fa-user-circle me-1"></i> {{ request.session.user_name }}
                             </a>
                         </li>
-                    {% elif user_type == 'admin' %}
+                    {% elif request.session.user_type == 'admin' %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'admin_dashboard' %}">
                                 <i class="fas fa-home me-1"></i> Dashboard
@@ -230,7 +230,7 @@
                         </li>
                     {% endif %}
                     
-                    {% if user_type %}
+                    {% if request.session.user_type %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'logout' %}">
                                 <i class="fas fa-sign-out-alt me-1"></i> Logout

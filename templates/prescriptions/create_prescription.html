@@ -144,10 +144,13 @@
                 <p class="mb-0">Buat resep obat untuk pasien</p>
             </div>
             <div class="col-md-4 text-md-end">
-                <a href="{% url 'doctor_patient_detail' patient.patient_id %}" class="btn btn-light">
-                    <i class="fas fa-arrow-left me-2"></i>Kembali ke Detail Pasien
-                </a>
+                {% if patient.id %}
+                    <a href="{% url 'doctor_patient_detail' patient.id %}">Detail</a>
+                {% else %}
+                    <span class="text-muted">ID tidak tersedia</span>
+                {% endif %}
             </div>
+            
         </div>
     </div>
     

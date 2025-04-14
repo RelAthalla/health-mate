@@ -15,13 +15,10 @@ def login_view(request):
     if 'user_type' in request.session:
         user_type = request.session['user_type']
         if user_type == 'patient':
-            print("A")
             return redirect('patient_dashboard')
         elif user_type == 'doctor':
-            print("B")
             return redirect('doctor_dashboard')
         elif user_type == 'admin':
-            print("C")
             return redirect('admin_dashboard')
     if request.method == 'POST':
         form = LoginForm(request.POST)
