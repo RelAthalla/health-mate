@@ -17,13 +17,8 @@ def home(request):
         elif user_type == 'admin':
             return redirect('admin_dashboard')
     # Get featured doctors for home page
-    featured_doctors = get_all_doctors()[:4]  # Limit to 4 doctors
     
-    context = {
-        'featured_doctors': featured_doctors,
-    }
-    
-    return render(request, 'home.html', context)
+    return render(request, 'home.html')
 
 def access_denied(request):
     """View for access denied page"""
