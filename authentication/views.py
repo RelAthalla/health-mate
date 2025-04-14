@@ -89,6 +89,7 @@ def patient_register(request):
             address = form.cleaned_data['address']
             password = hash_password(form.cleaned_data['password'])
             wallet_pin = form.cleaned_data['wallet_pin']
+            confirm_pin = form.cleaned_data['confirm_pin']
 
             recaptcha_response = request.POST.get('g-recaptcha-response')
 

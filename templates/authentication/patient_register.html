@@ -169,11 +169,20 @@
                                         </div>
                                     {% endif %}
                                 </div>
-                                
-                                <!-- reCAPTCHA Widget -->
-                                <div class="g-recaptcha"  data-sitekey="6LfQhBcrAAAAAIRDhfzitbuaVQxlnuHoNvJBQGFh"></div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.confirm_pin.id_for_label }}" class="form-label">Konfirmasi Pin</label>
+                                    {{ form.confirm_pin }}
+                                    {% if form.confirm_pin.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.confirm_pin.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
                             </div>
-        
+                            
+                            <!-- reCAPTCHA Widget -->
+                            <div class="g-recaptcha"  data-sitekey="6LfQhBcrAAAAAIRDhfzitbuaVQxlnuHoNvJBQGFh"></div>
+                            
                             <div class="mb-3 form-check">
                                 <input type="checkbox" class="form-check-input" id="termsCheck" required>
                                 <label class="form-check-label" for="termsCheck">
