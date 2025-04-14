@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h2>Verify Your Phone Number</h2>
+    <p>We'll send a verification code to your phone number ending with {{phone_number}}.</p>
+    
+    <div id="recaptcha-container"></div>
+    <button id="send-code-btn" class="btn btn-primary">Send Code</button>
+    
+    <div id="verification-code-form" style="display:none;">
+        <div class="form-group mt-3">
+            <input type="text" id="verification-code" class="form-control" placeholder="Enter verification code">
+        </div>
+        <button id="verify-code-btn" class="btn btn-success">Verify Code</button>
+    </div>
+    
+    <div id="error-message" class="alert alert-danger mt-3" style="display:none;"></div>
+</div>
+
+{% block extra_js %}
+<!-- Firebase App SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-auth-compat.js"></script>
+
+<script>
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "{{ firebase_api_key }}",
+        // Add other Firebase config parameters here
+        authDomain: "your-project-id.firebaseapp.com",
+        projectId: "your-project-id",
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    
+    // Set up the reCAPTCHA verifier
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        'size': 'normal',
+        'callback': function(response) {
+            // reCAPTCHA solved, enable the "Send Code" button
+            document.getElementById('send-code-btn').disabled = false;
+        }
+    });
+    
+    // Function to send verification code
+    document.getElementById('send-code-btn').addEventListener('click', function() {
+        const phoneNumber = "{{ session_phone }}"; // Use the full phone number stored in session
+        
+        firebase.auth().signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+            .then(function(confirmationResult) {
+                // SMS sent. Save confirmation result for later use
+                window.confirmationResult = confirmationResult;
+                
+                // Show the verification code input form
+                document.getElementById('verification-code-form').style.display = 'block';
+                document.getElementById('send-code-btn').disabled = true;
+            })
+            .catch(function(error) {
+                // Error occurred during sending SMS
+                document.getElementById('error-message').style.display = 'block';
+                document.getElementById('error-message').textContent = error.message;
+                
+                // Reset reCAPTCHA
+                window.recaptchaVerifier.render().then(function(widgetId) {
+                    grecaptcha.reset(widgetId);
+                });
+            });
+    });
+    
+    // Function to verify code
+    document.getElementById('verify-code-btn').addEventListener('click', function() {
+        const code = document.getElementById('verification-code').value;
+        
+        window.confirmationResult.confirm(code)
+            .then(function(result) {
+                // User signed in successfully
+                const user = result.user;
+                
+                // Get the ID token
+                user.getIdToken().then(function(idToken) {
+                    // Send the token to your server
+                    fetch("{% url 'verify_firebase_token' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: 'idToken=' + idToken
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Redirect to appointments page
+                            window.location.href = "{% url 'patient_appointments' %}";
+                        } else {
+                            // Show error
+                            document.getElementById('error-message').style.display = 'block';
+                            document.getElementById('error-message').textContent = data.error;
+                        }
+                    });
+                });
+            })
+            .catch(function(error) {
+                // Invalid code
+                document.getElementById('error-message').style.display = 'block';
+                document.getElementById('error-message').textContent = "Invalid verification code. Please try again.";
+            });
+    });
+</script>
+{% endblock %}
+{% endblock %}

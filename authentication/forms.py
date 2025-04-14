@@ -70,6 +70,11 @@ class PatientRegistrationForm(forms.Form):
                                         'class': 'form-control',
                                         'placeholder': 'Confirm password'
                                     }))
+    wallet_pin = forms.CharField(max_length=6, required=True, 
+                   widget=forms.PasswordInput(attrs={
+                       'class': 'form-control',
+                       'placeholder': 'Enter wallet pin (6 digits)'
+                   }))
     
     def clean(self):
         cleaned_data = super().clean()

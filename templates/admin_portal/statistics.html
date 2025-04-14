@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}Statistics - HealthMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .stat-card .card-header {
+        background: rgba(52, 152, 219, 0.1);
+        border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+    }
+    
+    .stat-card .card-body {
+        padding: 20px;
+    }
+    
+    .stat-info {
+        margin-bottom: 15px;
+    }
+    
+    .stat-info .label {
+        color: #777;
+        font-size: 0.9rem;
+        margin-bottom: 0;
+    }
+    
+    .stat-info .value {
+        font-weight: 500;
+        margin-bottom: 0;
+    }
+    
+    .badge-stat {
+        background-color: #3498db;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h2><i class="fas fa-chart-line me-2"></i>System Statistics</h2>
+                <p class="mb-0">Overview of system data and trends</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Patient Registration Stats -->
+    <div class="row">
+        <div class="col-12">
+            <div class="stat-card card">
+                <div class="card-header">
+                    <h5 class="card-title">Patient Registration Stats</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Bulan</th>
+                                <th>Tahun</th>
+                                <th>Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in patient_stats %}
+                                <tr>
+                                    <td>{{ stat.month }}</td>
+                                    <td>{{ stat.year }}</td>
+                                    <td>{{ stat.count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Stats -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="stat-card card">
+                <div class="card-header">
+                    <h5 class="card-title">Appointment Stats by Specialization</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Spesialisasi</th>
+                                <th>Jumlah Janji Temu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in appointment_stats %}
+                                <tr>
+                                    <td>{{ stat.specialization }}</td>
+                                    <td>{{ stat.count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Stats -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="stat-card card">
+                <div class="card-header">
+                    <h5 class="card-title">Revenue Stats by Month</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Bulan</th>
+                                <th>Tahun</th>
+                                <th>Total Pendapatan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in revenue_stats %}
+                                <tr>
+                                    <td>{{ stat.month }}</td>
+                                    <td>{{ stat.year }}</td>
+                                    <td>Rp {{ stat.total|floatformat:2 }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

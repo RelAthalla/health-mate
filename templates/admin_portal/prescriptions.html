@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}Resep Obat - HealthMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .prescription-card {
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .prescription-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .prescription-header {
+        background-color: rgba(52, 152, 219, 0.1);
+        padding: 15px 20px;
+        border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+    }
+    
+    .prescription-id {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+    
+    .prescription-date {
+        color: #777;
+        font-size: 0.9rem;
+    }
+    
+    .prescription-body {
+        padding: 20px;
+    }
+    
+    .prescription-section {
+        margin-bottom: 15px;
+    }
+    
+    .section-title {
+        font-weight: 600;
+        font-size: 1rem;
+        color: var(--primary-color);
+        margin-bottom: 8px;
+    }
+    
+    .section-content {
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        white-space: pre-line;
+    }
+    
+    .prescription-footer {
+        padding: 15px 20px;
+        background-color: #f9f9f9;
+        border-top: 1px solid #eee;
+    }
+    
+    .empty-state {
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
+    
+    .empty-state h5 {
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .empty-state p {
+        color: #777;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="fas fa-prescription me-2"></i>Resep Obat</h2>
+                <p class="mb-0">Lihat resep obat dari dokter Anda</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Prescriptions List -->
+    <div class="row">
+        {% if prescriptions %}
+            {% for prescription in prescriptions %}
+                <div class="col-md-6 mb-4">
+                    <div class="prescription-card">
+                        <div class="prescription-header">
+                            <div class="d-flex justify-content-between">
+                                <div class="prescription-id">Resep #{{ prescription.prescription_id }}</div>
+                                <div class="prescription-date">
+                                    <i class="far fa-calendar-alt me-1"></i> {% now "d M Y" %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="prescription-body">
+                            <div class="prescription-section">
+                                <div class="section-title">
+                                    <i class="fas fa-pills me-2"></i>Obat
+                                </div>
+                                <div class="section-content">
+                                    {{ prescription.medicine|linebreaksbr }}
+                                </div>
+                            </div>
+                            
+                            <div class="prescription-section">
+                                <div class="section-title">
+                                    <i class="fas fa-info-circle me-2"></i>Instruksi / Saran
+                                </div>
+                                <div class="section-content">
+                                    {{ prescription.advice|linebreaksbr }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="prescription-footer">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="text-muted">
+                                    <small><i class="fas fa-info-circle me-1"></i> Resep berlaku selama 30 hari</small>
+                                </div>
+                                <div>
+                                    <a href="{% url 'view_prescription' prescription.prescription_id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye me-1"></i> Lihat Detail
+                                    </a>
+                                    <a href="{% url 'download_prescription' prescription.prescription_id %}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-download me-1"></i> Unduh PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="empty-state">
+                    <i class="fas fa-prescription"></i>
+                    <h5>Belum Ada Resep</h5>
+                    <p>Anda belum memiliki resep obat dari dokter.</p>
+                    <a href="{% url 'find_doctors' %}" class="btn btn-primary">
+                        <i class="fas fa-calendar-plus me-2"></i>Buat Janji Konsultasi
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

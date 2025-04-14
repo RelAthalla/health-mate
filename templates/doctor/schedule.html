@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+
+{% block title %}Jadwal Mingguan - HealthMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .schedule-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .card-header {
+        background-color: rgba(52, 152, 219, 0.1);
+        padding: 15px 20px;
+        border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+    }
+    
+    .card-header h5 {
+        margin-bottom: 0;
+        color: var(--primary-color);
+    }
+    
+    .day-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    
+    .day-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 15px 20px;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+    
+    .day-header h5 {
+        margin-bottom: 0;
+        font-weight: 600;
+    }
+    
+    .day-header .day-date {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+    
+    .timeline {
+        position: relative;
+        padding: 20px;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-left: 50px;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .timeline-item:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: 20px;
+        top: 0;
+        width: 2px;
+        height: 100%;
+        background-color: #eee;
+    }
+    
+    .timeline-time {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 40px;
+        height: 40px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.8rem;
+        z-index: 1;
+    }
+    
+    .appointment-card {
+        background-color: rgba(52, 152, 219, 0.05);
+        border-radius: 5px;
+        padding: 15px;
+        border-left: 3px solid var(--primary-color);
+    }
+    
+    .patient-name {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .patient-info {
+        color: #777;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+    
+    .appointment-actions {
+        margin-top: 10px;
+    }
+    
+    .empty-day {
+        padding: 20px;
+        text-align: center;
+        color: #777;
+    }
+    
+    .empty-state {
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
+    
+    .empty-state h5 {
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .empty-state p {
+        color: #777;
+        margin-bottom: 20px;
+    }
+    
+    .today-indicator {
+        background-color: #27ae60;
+        color: white;
+        font-size: 0.8rem;
+        padding: 2px 8px;
+        border-radius: 3px;
+        margin-left: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="fas fa-calendar-alt me-2"></i>Jadwal Mingguan</h2>
+                <p class="mb-0">Jadwal konsultasi Anda untuk 7 hari ke depan</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'doctor_appointments' %}" class="btn btn-light">
+                    <i class="fas fa-list me-2"></i>Lihat Semua Jadwal
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Weekly Schedule -->
+    <div class="schedule-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5><i class="fas fa-calendar-week me-2"></i>Jadwal 7 Hari Ke Depan</h5>
+            <span class="text-muted">{{ schedule.keys|length }} Hari dengan Jadwal</span>
+        </div>
+        
+        <div class="card-body p-4">
+            {% if schedule %}
+                {% for date, appointments in schedule.items %}
+                    <div class="day-card">
+                        <div class="day-header d-flex justify-content-between align-items-center">
+                            {% with date_obj=date|date:"Y-m-d"|date %}
+                                <div>
+                                    <h5>{{ date_obj|date:"l" }}
+                                        {% if date_obj == today %}
+                                            <span class="today-indicator">Hari Ini</span>
+                                        {% endif %}
+                                    </h5>
+                                    <div class="day-date">{{ date_obj|date:"d F Y" }}</div>
+                                </div>
+                                <div>
+                                    <span class="badge bg-light text-dark">
+                                        <i class="fas fa-user me-1"></i> {{ appointments|length }} Pasien
+                                    </span>
+                                </div>
+                            {% endwith %}
+                        </div>
+                        
+                        <div class="timeline">
+                            {% for appointment in appointments %}
+                                <div class="timeline-item">
+                                    <div class="timeline-time">
+                                        {{ appointment.time|time:"H:i" }}
+                                    </div>
+                                    <div class="appointment-card">
+                                        <div class="patient-name">{{ appointment.patient_name }}</div>
+                                        <div class="patient-info">
+                                            ID Pasien: {{ appointment.patient_id }}
+                                        </div>
+                                        <div class="appointment-actions">
+                                            <a href="{% url 'doctor_patient_detail' appointment.patient_id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-user-circle me-1"></i> Detail Pasien
+                                            </a>
+                                            <a href="{% url 'create_prescription' appointment.patient_id %}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-prescription me-1"></i> Buat Resep
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h5>Tidak Ada Jadwal</h5>
+                    <p>Anda tidak memiliki jadwal konsultasi dalam 7 hari ke depan.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Working Hours Information -->
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-clock me-2"></i>Jam Praktek</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <table class="table">
+                        <tr>
+                            <th>Senin - Jumat</th>
+                            <td>09:00 - 17:00</td>
+                        </tr>
+                        <tr>
+                            <th>Sabtu</th>
+                            <td>09:00 - 14:00</td>
+                        </tr>
+                        <tr>
+                            <th>Minggu</th>
+                            <td>Libur</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Catatan:</strong> Jadwal praktek dapat berubah sewaktu-waktu. Pastikan untuk selalu memeriksa jadwal Anda.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set today's date for highlight
+        window.today = new Date().toISOString().split('T')[0];
+    });
+</script>
+{% endblock %}
