@@ -77,7 +77,7 @@ def patient_detail(request, patient_id):
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT a.*, d.name as doctor_name
+            SELECT a.*, d.First_Name || ' ' || d.Last_Name AS doctor_name
             FROM appointment a
             JOIN doctor d ON a.doctor_id = d.doctor_id
             WHERE a.patient_id = %s
@@ -226,7 +226,7 @@ def appointments(request):
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT a.*, p.name as patient_name, d.name as doctor_name
+            SELECT a.*, p.name as patient_name, d.First_Name || ' ' || d.Last_Name AS doctor_name
             FROM appointment a
             JOIN patient p ON a.patient_id = p.patient_id
             JOIN doctor d ON a.doctor_id = d.doctor_id

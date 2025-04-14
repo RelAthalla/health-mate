@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Kelola Janji Temu - HealthMate{% endblock %}
+{% block title %}Janji Temu - HealthMate{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -12,89 +12,139 @@
         margin-bottom: 30px;
     }
 
-    .appointment-card {
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 20px;
+    .appointments-card {
         background-color: white;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .card-header {
+        background-color: rgba(52, 152, 219, 0.1);
+        padding: 15px 20px;
+        border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+    }
+
+    .card-header h5 {
+        margin-bottom: 0;
+        color: var(--primary-color);
+    }
+
+    .appointment-item {
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
         transition: all 0.3s ease;
     }
 
-    .appointment-card:hover {
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    .appointment-item:last-child {
+        border-bottom: none;
     }
 
-    .badge-status {
+    .appointment-item:hover {
+        background-color: rgba(52, 152, 219, 0.05);
+    }
+
+    .appointment-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .appointment-id {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .appointment-date {
+        color: #777;
+        font-size: 0.9rem;
+    }
+
+    .appointment-body {
+        margin-top: 5px;
+    }
+
+    .appointment-status {
+        display: inline-block;
+        padding: 4px 12px;
         font-size: 0.85rem;
-        padding: 5px 10px;
         border-radius: 20px;
+        font-weight: 500;
     }
 
-    .badge-success {
-        background-color: #28a745;
-        color: white;
+    .status-completed {
+        background-color: rgba(46, 204, 113, 0.1);
+        color: #2ecc71;
     }
 
-    .badge-warning {
-        background-color: #ffc107;
-        color: black;
+    .status-pending {
+        background-color: rgba(243, 156, 18, 0.1);
+        color: #f39c12;
     }
 
-    .badge-danger {
-        background-color: #dc3545;
-        color: white;
+    .status-cancelled {
+        background-color: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
     }
 
-    .search-bar {
-        margin-bottom: 25px;
+    .empty-state {
+        text-align: center;
+        padding: 30px;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #ddd;
+        margin-bottom: 15px;
+    }
+
+    .empty-state h5 {
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: #777;
+        margin-bottom: 15px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container py-5">
-    <div class="page-header d-flex justify-content-between align-items-center">
-        <div>
-            <h2><i class="fas fa-calendar-check me-2"></i>Kelola Janji Temu</h2>
-            <p class="mb-0">Daftar semua janji temu dari seluruh pasien dan dokter</p>
+    <!-- Page Header -->
+    <div class="page-header">
+        <h2><i class="fas fa-calendar-check me-2"></i>Janji Temu</h2>
+        <p class="mb-0">Daftar seluruh janji temu pasien dan dokter</p>
+    </div>
+
+    <!-- Appointments Card -->
+    <div class="appointments-card">
+        <div class="card-header">
+            <h5><i class="fas fa-user-clock me-2"></i>Daftar Janji Temu</h5>
         </div>
-    </div>
 
-    <div class="search-bar">
-        <form method="GET" action="">
-            <div class="input-group">
-                <input type="text" name="q" class="form-control" placeholder="Cari berdasarkan nama pasien, dokter, atau tanggal..." value="{{ request.GET.q }}">
-                <button class="btn btn-primary" type="submit"><i class="fas fa-search me-1"></i>Cari</button>
-            </div>
-        </form>
-    </div>
-
-    {% if appointments %}
-        {% for appointment in appointments %}
-            <div class="appointment-card">
-                <div class="row">
-                    <div class="col-md-3">
-                        <p class="mb-1"><strong>Tanggal:</strong> {{ appointment.date|date:"d M Y" }}</p>
-                        <p class="mb-1"><strong>Waktu:</strong> {{ appointment.time|time:"H:i" }}</p>
+        {% if appointments %}
+            {% for appt in appointments %}
+                <div class="appointment-item">
+                    <div class="appointment-header">
+                        <div class="appointment-id">#{{ appt.appointment_id }} - {{ appt.patient_name }}</div>
+                        <div class="appointment-date">{{ appt.date|date:"d F Y" }} | {{ appt.time|time:"H:i" }}</div>
                     </div>
-                    <div class="col-md-4">
-                        <p class="mb-1"><strong>Pasien:</strong> {{ appointment.patient.name }}</p>
-                        <p class="mb-1"><strong>Dokter:</strong> {{ appointment.doctor.name }}</p>
-                    </div>
-                    <div class="col-md-5 d-flex justify-content-between align-items-start">
-                        <p class="mb-1"><strong>Keluhan:</strong> {{ appointment.complaint }}</p>
-                        <span class="badge-status {% if appointment.status == 'selesai' %}badge-success{% elif appointment.status == 'dijadwalkan' %}badge-warning{% else %}badge-danger{% endif %}">
-                            {{ appointment.status|capfirst }}
-                        </span>
+                    <div class="appointment-body">
+                        <div>Dokter: <strong>{{ appt.doctor_name }}</strong></div>
+                        <div>Spesialisasi: {{ appt.specialization|default:"-" }}</div>
                     </div>
                 </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-calendar-times"></i>
+                <h5>Tidak Ada Janji Temu</h5>
+                <p>Belum ada janji temu yang tercatat dalam sistem.</p>
             </div>
-        {% endfor %}
-    {% else %}
-        <div class="alert alert-info">
-            Tidak ada janji temu yang ditemukan.
-        </div>
-    {% endif %}
+        {% endif %}
+    </div>
 </div>
 {% endblock %}
