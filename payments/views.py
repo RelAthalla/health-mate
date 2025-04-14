@@ -8,6 +8,7 @@ from core.utils import (
     get_patient, get_patient_bills, pay_from_wallet,
     update_wallet_balance, create_bill, dictfetchone
 )
+from patient.views import bills
 
 @patient_required
 def payment_history(request):
@@ -41,7 +42,7 @@ def pay_bill(request, bill_id):
     
     if not bill:
         messages.error(request, "Bill not found or you don't have permission to view it.")
-        return redirect('payment_history')
+        return redirect('patient_bills')
     
     # Get patient's wallet balance
     patient = get_patient(patient_id)
@@ -59,12 +60,12 @@ def pay_bill(request, bill_id):
             # Update bill status
             with connection.cursor() as cursor:
                 cursor.execute(
-                    "DELETE FROM bill WHERE bill_id = %s",
+                    "UPDATE bill SET status = 'Paid' WHERE bill_id = %s",
                     [bill_id]
                 )
             
             messages.success(request, "Payment successful.")
-            return redirect('payment_history')
+            return redirect('patient_bills')
         else:
             messages.error(request, "Payment failed. Please check your wallet balance and PIN.")
     

@@ -10,7 +10,7 @@ from core.utils import (
 )
 from .forms import AppointmentForm
 @patient_required
-def book_appointment(request, doctor_id=None):
+def book_appointment(request, doctor_id):
     """Book appointment view"""
     patient_id = request.session.get('user_id')
     
@@ -173,7 +173,7 @@ def cancel_appointment(request, appointment_id):
         )
 
     messages.success(request, "Appointment and related bill cancelled successfully.")
-    return redirect('patient_appointments')
+    return redirect('patient_dashboard')
 
 @patient_required
 def reschedule_appointment(request, appointment_id):
