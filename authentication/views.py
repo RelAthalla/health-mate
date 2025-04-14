@@ -88,6 +88,7 @@ def patient_register(request):
             birthdate = form.cleaned_data['birthdate']
             address = form.cleaned_data['address']
             password = hash_password(form.cleaned_data['password'])
+            wallet_pin = form.cleaned_data['wallet_pin']
 
             recaptcha_response = request.POST.get('g-recaptcha-response')
 
@@ -118,11 +119,11 @@ def patient_register(request):
                     cursor.execute(
                         """
                         INSERT INTO patient 
-                        (first_name, last_name, name, sex, phone, blood_type, password, birthdate, address)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        (first_name, last_name, name, sex, phone, blood_type, password, birthdate, address, wallet_pin)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                         RETURNING patient_id
                         """,
-                        [first_name, last_name, full_name, sex, phone, blood_type, password, birthdate, address]
+                        [first_name, last_name, full_name, sex, phone, blood_type, password, birthdate, address, wallet_pin]
                     )
                     new_patient_id = cursor.fetchone()[0]
                 

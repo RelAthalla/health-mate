@@ -159,8 +159,20 @@
                                 </div>
                             </div>
                             
-                            <!-- reCAPTCHA Widget -->
-                            <div class="g-recaptcha"  data-sitekey="6LfQhBcrAAAAAIRDhfzitbuaVQxlnuHoNvJBQGFh"></div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="{{ form.wallet_pin.id_for_label }}" class="form-label">Wallet Pin</label>
+                                    {{ form.wallet_pin }}
+                                    {% if form.wallet_pin.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.wallet_pin.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- reCAPTCHA Widget -->
+                                <div class="g-recaptcha"  data-sitekey="6LfQhBcrAAAAAIRDhfzitbuaVQxlnuHoNvJBQGFh"></div>
+                            </div>
         
                             <div class="mb-3 form-check">
                                 <input type="checkbox" class="form-check-input" id="termsCheck" required>
