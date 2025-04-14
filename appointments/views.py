@@ -9,7 +9,6 @@ from core.utils import (
     dictfetchall, dictfetchone
 )
 from .forms import AppointmentForm
-
 @patient_required
 def book_appointment(request, doctor_id=None):
     """Book appointment view"""
@@ -52,22 +51,11 @@ def book_appointment(request, doctor_id=None):
                     messages.error(request, "This time slot is already booked. Please select another time.")
                     return redirect('book_appointment', doctor_id=doctor_id)
             
-            # Create appointment
-            appointment_id = create_appointment(patient_id, doctor_id, date, appointment_time)
+            # Create appointment and bill
+            appointment_fee = 100000.00  # Example fee
+            appointment_id = create_appointment(patient_id, doctor_id, date, appointment_time, appointment_fee)
             
             if appointment_id:
-                # Create bill for the appointment
-                appointment_fee = 100000.00  # Example fee
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        """
-                        INSERT INTO bill 
-                        (patient_id, date, time, amount)
-                        VALUES (%s, %s, %s, %s)
-                        """,
-                        [patient_id, datetime.now().date(), datetime.now().time(), appointment_fee]
-                    )
-                
                 messages.success(request, "Appointment booked successfully.")
                 return redirect('patient_appointments')
             else:
@@ -83,6 +71,7 @@ def book_appointment(request, doctor_id=None):
     }
     
     return render(request, 'appointments/book_appointment.html', context)
+
 
 def get_available_time_slots(doctor_id, date):
     """Get available time slots for a doctor on a specific date"""
@@ -138,8 +127,8 @@ def get_available_slots_api(request):
 def cancel_appointment(request, appointment_id):
     """Cancel appointment view"""
     patient_id = request.session.get('user_id')
-    
-    # Check if the appointment belongs to this patient
+
+    # Cek apakah appointment valid untuk user ini
     with connection.cursor() as cursor:
         cursor.execute(
             """
@@ -150,20 +139,30 @@ def cancel_appointment(request, appointment_id):
             [appointment_id, patient_id]
         )
         appointment = dictfetchone(cursor)
-    
+
     if not appointment:
         messages.error(request, "Appointment not found or you don't have permission to cancel it.")
         return redirect('patient_appointments')
-    
-    # Check if the appointment is in the future
+
+    # Cek apakah appointment ada di masa depan
     appointment_date = appointment['date']
     current_date = datetime.now().date()
-    
+
     if appointment_date < current_date:
         messages.error(request, "Cannot cancel past appointments.")
         return redirect('patient_appointments')
-    
-    # Cancel the appointment
+
+    # Delete the related bill based on matching appointment_id and date
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            DELETE FROM bill
+            WHERE appointment_id = %s AND date = %s
+            """,
+            [appointment_id, appointment_date]
+        )
+
+    # Hapus appointment
     with connection.cursor() as cursor:
         cursor.execute(
             """
@@ -172,8 +171,8 @@ def cancel_appointment(request, appointment_id):
             """,
             [appointment_id]
         )
-    
-    messages.success(request, "Appointment cancelled successfully.")
+
+    messages.success(request, "Appointment and related bill cancelled successfully.")
     return redirect('patient_appointments')
 
 @patient_required

@@ -313,16 +313,16 @@
                                 <tbody>
                                     {% if bill.amount > 0 %}
                                         <tr>
-                                            <td>Harga Konsultasi</td>
+                                            <td>Biaya Top Up</td>
                                             <td class="text-end">Rp {{ bill.amount|floatformat:0 }}</td>
                                         </tr>
                                         <tr>
-                                            <td>Biaya Layanan</td>
+                                            <td>Biaya Admin</td>
                                             <td class="text-end">Rp 0</td>
                                         </tr>
                                     {% else %}
                                         <tr>
-                                            <td>Harga Konsultasi</td>
+                                            <td>Biaya Top Up</td>
                                             <td class="text-end">Rp {{ bill.amount|floatformat:0 }}</td>
                                         </tr>
                                     {% endif %}
