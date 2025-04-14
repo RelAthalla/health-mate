@@ -15,6 +15,7 @@ from .forms import PatientProfileForm, WalletPinForm, WalletTopUpForm
 def dashboard(request):
     """Patient dashboard view"""
     patient_id = request.session.get('user_id')
+    user_type = request.session.get('user_type')
     
     # Get patient data
     patient = get_patient(patient_id)
@@ -34,7 +35,9 @@ def dashboard(request):
         'patient': patient,
         'upcoming_appointments': upcoming_appointments,
         'prescriptions': prescriptions,
-        'bills': bills
+        'bills': bills, 
+        'user_type': user_type
+        
     }
     
     return render(request, 'patient/dashboard.html', context)
@@ -86,6 +89,7 @@ def profile(request):
 def appointments(request):
     """Patient appointments view"""
     patient_id = request.session.get('user_id')
+    user_type = request.session.get('user_type')
     
     # Get all appointments
     appointments = get_patient_appointments(patient_id)
@@ -104,7 +108,8 @@ def appointments(request):
     
     context = {
         'upcoming_appointments': upcoming,
-        'past_appointments': past
+        'past_appointments': past,
+        'user_type': user_type
     }
     
     return render(request, 'patient/appointments.html', context)
@@ -113,6 +118,7 @@ def appointments(request):
 def find_doctors(request):
     """Find doctors view"""
     specialization = request.GET.get('specialization', None)
+    user_type = request.session.get('user_type')
     
     if specialization:
         doctors = get_doctors_by_specialization(specialization)
@@ -127,7 +133,8 @@ def find_doctors(request):
     context = {
         'doctors': doctors,
         'specializations': specializations,
-        'selected_specialization': specialization
+        'selected_specialization': specialization,
+        'user_type': user_type
     }
     
     return render(request, 'patient/find_doctors.html', context)
@@ -148,6 +155,7 @@ def prescriptions(request):
 def medical_history(request):
     """Patient medical history view"""
     patient_id = request.session.get('user_id')
+    user_type = request.session.get('user_type')
     
     # Get patient data
     patient = get_patient(patient_id)
@@ -161,7 +169,8 @@ def medical_history(request):
     context = {
         'patient': patient,
         'appointments': appointments,
-        'prescriptions': prescriptions
+        'prescriptions': prescriptions,
+        'user_type': user_type
     }
     
     return render(request, 'patient/medical_history.html', context)
