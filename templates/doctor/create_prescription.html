@@ -27,7 +27,7 @@
     
     .patient-info h5 {
         color: var(--primary-color);
-        margin-bottom: 10px;
+        margin-bottom: 15px;
     }
     
     .patient-details {
@@ -50,6 +50,87 @@
         font-weight: 500;
         margin-bottom: 0;
     }
+    
+    .blood-type-badge {
+        background-color: #e74c3c;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .medical-note {
+        background-color: rgba(241, 196, 15, 0.1);
+        border-left: 4px solid #f1c40f;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+    
+    .medical-note h6 {
+        color: #f39c12;
+        margin-bottom: 10px;
+    }
+    
+    .common-drugs {
+        background-color: rgba(52, 152, 219, 0.05);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .common-drugs h6 {
+        color: var(--primary-color);
+        margin-bottom: 15px;
+    }
+    
+    .drug-btn {
+        margin-right: 5px;
+        margin-bottom: 5px;
+        font-size: 0.85rem;
+    }
+    
+    .prescription-form label {
+        font-weight: 500;
+    }
+    
+    .prescription-preview {
+        background-color: #f9f9f9;
+        border: 1px dashed #ddd;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    
+    .preview-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .preview-header h5 {
+        color: var(--primary-color);
+        margin-bottom: 5px;
+    }
+    
+    .preview-section {
+        margin-bottom: 15px;
+    }
+    
+    .preview-section .section-title {
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--primary-color);
+    }
+    
+    .preview-section .section-content {
+        background-color: white;
+        padding: 10px;
+        border-radius: 5px;
+        min-height: 50px;
+    }
 </style>
 {% endblock %}
 
@@ -59,19 +140,20 @@
     <div class="page-header">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h2><i class="fas fa-prescription me-2"></i>Buat Resep Baru</h2>
+                <h2><i class="fas fa-prescription me-2"></i>Buat Resep</h2>
                 <p class="mb-0">Buat resep obat untuk pasien</p>
             </div>
             <div class="col-md-4 text-md-end">
                 <a href="{% url 'doctor_patient_detail' patient.patient_id %}" class="btn btn-light">
-                    <i class="fas fa-arrow-left me-2"></i>Kembali ke Profil Pasien
+                    <i class="fas fa-arrow-left me-2"></i>Kembali ke Detail Pasien
                 </a>
             </div>
         </div>
     </div>
     
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
+    <div class="row">
+        <!-- Left Column - Prescription Form -->
+        <div class="col-lg-8">
             <div class="prescription-card card">
                 <div class="card-body p-4">
                     <!-- Patient Information -->
@@ -83,40 +165,86 @@
                                 <p class="value">{{ patient.name }}</p>
                             </div>
                             <div class="detail">
-                                <p class="label">ID Pasien</p>
-                                <p class="value">{{ patient.patient_id }}</p>
-                            </div>
-                            <div class="detail">
                                 <p class="label">Jenis Kelamin</p>
                                 <p class="value">{{ patient.sex }}</p>
                             </div>
                             <div class="detail">
+                                <p class="label">Tanggal Lahir</p>
+                                <p class="value">{{ patient.birthdate|date:"d M Y" }}</p>
+                            </div>
+                            <div class="detail">
                                 <p class="label">Golongan Darah</p>
-                                <p class="value">{{ patient.blood_type }}</p>
+                                <p class="value"><span class="blood-type-badge">{{ patient.blood_type }}</span></p>
                             </div>
                         </div>
                     </div>
                     
+                    <!-- Medical Note (Example) -->
+                    <div class="medical-note">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>Catatan Penting</h6>
+                        <p class="mb-0">Pastikan untuk memeriksa riwayat alergi pasien sebelum memberikan resep obat.</p>
+                    </div>
+                    
+                    <!-- Common Drugs Quick Buttons -->
+                    <div class="common-drugs">
+                        <h6><i class="fas fa-pills me-2"></i>Obat Umum</h6>
+                        <button type="button" class="btn btn-sm btn-outline-primary drug-btn" onclick="addDrug('Paracetamol 500mg, 3x1 sehari setelah makan')">Paracetamol 500mg</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary drug-btn" onclick="addDrug('Amoxicillin 500mg, 3x1 sehari setelah makan')">Amoxicillin 500mg</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary drug-btn" onclick="addDrug('Cetirizine 10mg, 1x1 sehari sebelum tidur')">Cetirizine 10mg</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary drug-btn" onclick="addDrug('Omeprazole 20mg, 1x1 sehari sebelum makan')">Omeprazole 20mg</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary drug-btn" onclick="addDrug('Ibuprofen 400mg, 3x1 sehari setelah makan')">Ibuprofen 400mg</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary drug-btn" onclick="addDrug('Loratadine 10mg, 1x1 sehari')">Loratadine 10mg</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary drug-btn" onclick="addDrug('Metformin 500mg, 2x1 sehari setelah makan')">Metformin 500mg</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary drug-btn" onclick="addDrug('Vitamin C 500mg, 1x1 sehari')">Vitamin C 500mg</button>
+                    </div>
+                    
                     <!-- Prescription Form -->
-                    <form method="post">
+                    <form class="prescription-form" method="post">
                         {% csrf_token %}
                         <input type="hidden" name="patient_id" value="{{ patient.patient_id }}">
                         
                         <div class="mb-3">
                             <label for="medicine" class="form-label">Obat</label>
-                            <textarea class="form-control" id="medicine" name="medicine" rows="4" placeholder="Masukkan detail obat (nama, dosis, frekuensi, dll.)" required></textarea>
+                            <textarea class="form-control" id="medicine" name="medicine" rows="5" placeholder="Masukkan detail obat (nama, dosis, frekuensi, dll.)" required></textarea>
                             <div class="form-text">
-                                Contoh: Paracetamol 500mg, 3x sehari setelah makan
+                                Format: Nama obat, dosis, frekuensi penggunaan
+                                <br>
+                                Contoh: Paracetamol 500mg, 3x1 sehari setelah makan
                             </div>
                         </div>
                         
-                        <div class="mb-4">
-                            <label for="advice" class="form-label">Instruksi/Saran</label>
-                            <textarea class="form-control" id="advice" name="advice" rows="4" placeholder="Masukkan instruksi atau saran untuk pasien" required></textarea>
+                        <div class="mb-3">
+                            <label for="advice" class="form-label">Instruksi / Saran</label>
+                            <textarea class="form-control" id="advice" name="advice" rows="5" placeholder="Masukkan instruksi atau saran untuk pasien" required></textarea>
+                            <div class="form-text">
+                                Berikan instruksi rinci tentang cara penggunaan obat dan saran tambahan untuk pasien
+                            </div>
                         </div>
                         
-                        <div class="d-flex justify-content-end">
-                            <button type="button" class="btn btn-outline-secondary me-2" onclick="window.history.back();">
+                        <!-- Preview Section -->
+                        <div class="prescription-preview">
+                            <div class="preview-header">
+                                <h5>Preview Resep</h5>
+                                <p class="text-muted mb-0">Untuk: {{ patient.name }}</p>
+                            </div>
+                            
+                            <div class="preview-section">
+                                <div class="section-title">Obat</div>
+                                <div class="section-content" id="medicine-preview">
+                                    <em class="text-muted">Detail obat akan muncul di sini</em>
+                                </div>
+                            </div>
+                            
+                            <div class="preview-section">
+                                <div class="section-title">Instruksi / Saran</div>
+                                <div class="section-content" id="advice-preview">
+                                    <em class="text-muted">Instruksi akan muncul di sini</em>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary" onclick="window.history.back();">
                                 Batal
                             </button>
                             <button type="submit" class="btn btn-primary">
@@ -127,6 +255,94 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Right Column - Patient History -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Riwayat Resep</h5>
+                </div>
+                <div class="card-body">
+                    {% if prescriptions %}
+                        <ul class="list-group">
+                            {% for prescription in prescriptions %}
+                                <li class="list-group-item">
+                                    <h6 class="mb-1">Resep #{{ prescription.prescription_id }}</h6>
+                                    <p class="mb-1">{{ prescription.medicine|truncatechars:50 }}</p>
+                                    <small class="text-muted">{% now "d M Y" %}</small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted mb-0">Pasien belum memiliki riwayat resep</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Panduan Resep</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li class="mb-2">Gunakan nama generik untuk obat</li>
+                        <li class="mb-2">Cantumkan dosis dengan jelas</li>
+                        <li class="mb-2">Tentukan frekuensi dan waktu penggunaan</li>
+                        <li class="mb-2">Perhatikan potensi interaksi antar obat</li>
+                        <li class="mb-2">Berikan instruksi khusus jika diperlukan</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Function to add drug to medicine textarea
+    function addDrug(drugDetails) {
+        const medicineTextarea = document.getElementById('medicine');
+        const currentText = medicineTextarea.value;
+        
+        if (currentText) {
+            medicineTextarea.value = currentText + '\n' + drugDetails;
+        } else {
+            medicineTextarea.value = drugDetails;
+        }
+        
+        // Update preview
+        updatePreview();
+    }
+    
+    // Function to update preview
+    function updatePreview() {
+        const medicineText = document.getElementById('medicine').value;
+        const adviceText = document.getElementById('advice').value;
+        
+        const medicinePreview = document.getElementById('medicine-preview');
+        const advicePreview = document.getElementById('advice-preview');
+        
+        if (medicineText) {
+            medicinePreview.innerHTML = medicineText.replace(/\n/g, '<br>');
+        } else {
+            medicinePreview.innerHTML = '<em class="text-muted">Detail obat akan muncul di sini</em>';
+        }
+        
+        if (adviceText) {
+            advicePreview.innerHTML = adviceText.replace(/\n/g, '<br>');
+        } else {
+            advicePreview.innerHTML = '<em class="text-muted">Instruksi akan muncul di sini</em>';
+        }
+    }
+    
+    // Add event listeners to textareas
+    document.addEventListener('DOMContentLoaded', function() {
+        const medicineTextarea = document.getElementById('medicine');
+        const adviceTextarea = document.getElementById('advice');
+        
+        medicineTextarea.addEventListener('input', updatePreview);
+        adviceTextarea.addEventListener('input', updatePreview);
+    });
+</script>
 {% endblock %}
