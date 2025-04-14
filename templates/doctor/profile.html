@@ -81,20 +81,41 @@
         margin-left: 10px;
     }
     
-    .info-item {
+    .edit-toggle {
+        margin-bottom: 20px;
+        padding: 10px 15px;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+    }
+    
+    .display-mode .info-item {
         margin-bottom: 1.5rem;
     }
     
-    .info-label {
+    .display-mode .info-label {
         font-weight: 600;
         color: #555;
         margin-bottom: 0.5rem;
     }
     
-    .info-value {
+    .display-mode .info-value {
         padding: 0.5rem 1rem;
         background-color: #f9f9f9;
         border-radius: 5px;
+    }
+    
+    .edit-mode {
+        display: none;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 0.5rem;
     }
 </style>
 {% endblock %}
@@ -116,6 +137,16 @@
         </div>
     </div>
     
+    <!-- Display Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-info{% endif %} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="profile-card">
@@ -133,8 +164,15 @@
                     </div>
                 </div>
                 
-                <!-- Profile Information -->
-                <div class="form-section">
+                <!-- Edit Toggle -->
+                <div class="edit-toggle text-end p-3">
+                    <button id="editToggleBtn" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Edit Profil
+                    </button>
+                </div>
+                
+                <!-- Display Mode (Read-Only) -->
+                <div id="displayMode" class="form-section display-mode">
                     <div class="section-title">
                         <i class="fas fa-user-circle me-2"></i>Informasi Pribadi
                     </div>
@@ -192,17 +230,129 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Add more professional information as needed -->
-                    
-                    <div class="d-flex justify-content-end mt-4">
-                        <button class="btn btn-primary" disabled>
-                            <i class="fas fa-edit me-2"></i>Edit Profil
-                        </button>
-                    </div>
+                </div>
+                
+                <!-- Edit Mode (Form) -->
+                <div id="editMode" class="form-section edit-mode">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="section-title">
+                            <i class="fas fa-user-circle me-2"></i>Informasi Pribadi
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="first_name" class="form-label">Nama Depan</label>
+                                    <input type="text" class="form-control" id="first_name" name="first_name" value="{{ doctor.first_name }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="last_name" class="form-label">Nama Belakang</label>
+                                    <input type="text" class="form-control" id="last_name" name="last_name" value="{{ doctor.last_name }}" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="phone" class="form-label">Nomor Telepon</label>
+                                    <input type="text" class="form-control" id="phone" name="phone" value="{{ doctor.phone }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="sex" class="form-label">Jenis Kelamin</label>
+                                    <select class="form-select" id="sex" name="sex" required>
+                                        <option value="Laki-laki" {% if doctor.sex == 'Laki-laki' %}selected{% endif %}>Laki-laki</option>
+                                        <option value="Perempuan" {% if doctor.sex == 'Perempuan' %}selected{% endif %}>Perempuan</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="birthdate" class="form-label">Tanggal Lahir</label>
+                                    <input type="date" class="form-control" id="birthdate" name="birthdate" value="{{ doctor.birthdate|date:'Y-m-d' }}" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="address" class="form-label">Alamat</label>
+                            <textarea class="form-control" id="address" name="address" rows="3" required>{{ doctor.address }}</textarea>
+                        </div>
+                        
+                        <div class="section-title mt-4">
+                            <i class="fas fa-stethoscope me-2"></i>Informasi Profesional
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="specialization" class="form-label">Spesialisasi</label>
+                                    <select class="form-select" id="specialization" name="specialization" required>
+                                        <option value="Cardiology" {% if doctor.specialization == 'Cardiology' %}selected{% endif %}>Cardiology</option>
+                                        <option value="Dermatology" {% if doctor.specialization == 'Dermatology' %}selected{% endif %}>Dermatology</option>
+                                        <option value="Pediatrics" {% if doctor.specialization == 'Pediatrics' %}selected{% endif %}>Pediatrics</option>
+                                        <option value="Orthopedics" {% if doctor.specialization == 'Orthopedics' %}selected{% endif %}>Orthopedics</option>
+                                        <option value="Neurology" {% if doctor.specialization == 'Neurology' %}selected{% endif %}>Neurology</option>
+                                        <option value="Psychiatry" {% if doctor.specialization == 'Psychiatry' %}selected{% endif %}>Psychiatry</option>
+                                        <option value="Ophthalmology" {% if doctor.specialization == 'Ophthalmology' %}selected{% endif %}>Ophthalmology</option>
+                                        <option value="Gynecology" {% if doctor.specialization == 'Gynecology' %}selected{% endif %}>Gynecology</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="experience" class="form-label">Pengalaman (Tahun)</label>
+                                    <input type="number" class="form-control" id="experience" name="experience" min="0" max="50" value="{{ doctor.experience }}" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end mt-4">
+                            <button type="button" class="btn btn-outline-secondary me-2" id="cancelEditBtn">
+                                Batal
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Simpan Perubahan
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const displayMode = document.getElementById('displayMode');
+        const editMode = document.getElementById('editMode');
+        const editToggleBtn = document.getElementById('editToggleBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        
+        // Show edit mode
+        editToggleBtn.addEventListener('click', function() {
+            displayMode.style.display = 'none';
+            editMode.style.display = 'block';
+            editToggleBtn.style.display = 'none';
+        });
+        
+        // Cancel edit and return to display mode
+        cancelEditBtn.addEventListener('click', function() {
+            displayMode.style.display = 'block';
+            editMode.style.display = 'none';
+            editToggleBtn.style.display = 'block';
+        });
+    });
+</script>
 {% endblock %}
