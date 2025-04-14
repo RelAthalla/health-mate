@@ -7,6 +7,8 @@ from core.utils import (
     authenticate_patient, authenticate_doctor, authenticate_admin,
     hash_password, dictfetchone
 )
+import requests
+from django.conf import settings
 
 @require_http_methods(["GET", "POST"])
 def login_view(request):
@@ -15,13 +17,10 @@ def login_view(request):
     if 'user_type' in request.session:
         user_type = request.session['user_type']
         if user_type == 'patient':
-            print("A")
             return redirect('patient_dashboard')
         elif user_type == 'doctor':
-            print("B")
             return redirect('doctor_dashboard')
         elif user_type == 'admin':
-            print("C")
             return redirect('admin_dashboard')
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -30,6 +29,19 @@ def login_view(request):
             password = form.cleaned_data['password']
             user_type = form.cleaned_data['user_type']
             
+            recaptcha_response = request.POST.get('g-recaptcha-response')
+
+            data = {
+                'secret': settings.RECAPTCHA_SECRET_KEY, 
+                'response': recaptcha_response
+            }
+            verify_url = 'https://www.google.com/recaptcha/api/siteverify'
+            response = requests.post(verify_url, data=data)
+            result = response.json()
+
+            if not result.get('success'):
+                messages.error(request, 'reCAPTCHA verification failed. Please try again.')
+
             user = None
             if user_type == 'patient':
                 user = authenticate_patient(phone, password)
@@ -76,7 +88,21 @@ def patient_register(request):
             birthdate = form.cleaned_data['birthdate']
             address = form.cleaned_data['address']
             password = hash_password(form.cleaned_data['password'])
-            
+            wallet_pin = form.cleaned_data['wallet_pin']
+
+            recaptcha_response = request.POST.get('g-recaptcha-response')
+
+            data = {
+                'secret': settings.RECAPTCHA_SECRET_KEY, 
+                'response': recaptcha_response
+            }
+            verify_url = 'https://www.google.com/recaptcha/api/siteverify'
+            response = requests.post(verify_url, data=data)
+            result = response.json()
+
+            if not result.get('success'):
+                messages.error(request, 'reCAPTCHA verification failed. Please try again.')
+                
             try:
                 # Check if phone number already exists
                 with connection.cursor() as cursor:
@@ -93,11 +119,11 @@ def patient_register(request):
                     cursor.execute(
                         """
                         INSERT INTO patient 
-                        (first_name, last_name, name, sex, phone, blood_type, password, birthdate, address)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        (first_name, last_name, name, sex, phone, blood_type, password, birthdate, address, wallet_pin)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                         RETURNING patient_id
                         """,
-                        [first_name, last_name, full_name, sex, phone, blood_type, password, birthdate, address]
+                        [first_name, last_name, full_name, sex, phone, blood_type, password, birthdate, address, wallet_pin]
                     )
                     new_patient_id = cursor.fetchone()[0]
                 

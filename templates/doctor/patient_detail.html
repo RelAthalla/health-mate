@@ -72,6 +72,19 @@
         right: 20px;
     }
     
+    .medical-note {
+        background-color: rgba(241, 196, 15, 0.1);
+        border-left: 4px solid #f1c40f;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+    
+    .medical-note h6 {
+        color: #f39c12;
+        margin-bottom: 10px;
+    }
+    
     .tab-content {
         padding: 20px 0;
     }
@@ -96,6 +109,29 @@
     .quick-actions .btn {
         margin-bottom: 10px;
     }
+    
+    .empty-state {
+        text-align: center;
+        padding: 30px;
+        background-color: #f9f9f9;
+        border-radius: 10px;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #ddd;
+        margin-bottom: 15px;
+    }
+    
+    .empty-state h5 {
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .empty-state p {
+        color: #777;
+        margin-bottom: 15px;
+    }
 </style>
 {% endblock %}
 
@@ -105,8 +141,8 @@
     <div class="page-header">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h2><i class="fas fa-user-circle me-2"></i>Detail Pasien</h2>
-                <p class="mb-0">Informasi lengkap pasien dan riwayat medis</p>
+                <h2><i class="fas fa-user me-2"></i>Detail Pasien</h2>
+                <p class="mb-0">Informasi lengkap dan riwayat medis pasien</p>
             </div>
             <div class="col-md-4 text-md-end">
                 <a href="{% url 'doctor_patients' %}" class="btn btn-light">
@@ -155,6 +191,12 @@
                 </div>
             </div>
             
+            <!-- Medical Note (Example) -->
+            <div class="medical-note">
+                <h6><i class="fas fa-notes-medical me-2"></i>Catatan Medis</h6>
+                <p class="mb-0">Pasien memiliki riwayat alergi obat, periksalah rekam medis lengkap sebelum memberikan resep.</p>
+            </div>
+            
             <!-- Quick Actions -->
             <div class="card mb-4">
                 <div class="card-header">
@@ -162,7 +204,7 @@
                 </div>
                 <div class="card-body">
                     <div class="quick-actions">
-                        <a href="{% url 'create_prescription' patient.patient_id %}" class="btn btn-primary w-100">
+                        <a href="{% url 'create_prescription' patient.patient_id %}" class="btn btn-primary d-block w-100">
                             <i class="fas fa-prescription me-2"></i>Buat Resep Baru
                         </a>
                     </div>
@@ -173,7 +215,7 @@
         <!-- Right Column -->
         <div class="col-lg-8">
             <!-- Tabs Navigation -->
-            <ul class="nav nav-tabs mb-3" id="patientTab" role="tablist">
+            <ul class="nav nav-tabs" id="patientTab" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="appointments-tab" data-bs-toggle="tab" data-bs-target="#appointments" type="button" role="tab" aria-controls="appointments" aria-selected="true">
                         <i class="fas fa-calendar-check me-2"></i>Riwayat Konsultasi
@@ -204,21 +246,28 @@
                                             <i class="far fa-clock me-1"></i> {{ appointment.time|time:"H:i" }}
                                         </p>
                                     </div>
-                                    <div class="col-md-9">
+                                    <div class="col-md-7">
                                         <div class="d-flex justify-content-between">
                                             <h6>Konsultasi dengan {{ patient.name }}</h6>
                                             <span class="badge bg-success">Selesai</span>
                                         </div>
                                         <p class="text-muted mb-0">
-                                            Spesialisasi: {{ appointment.specialization }}
+                                            {{ appointment.specialization }}
                                         </p>
+                                    </div>
+                                    <div class="col-md-2 text-end">
+                                        <a href="{% url 'create_prescription' patient.patient_id %}" class="btn btn-sm btn-outline-primary mt-2">
+                                            <i class="fas fa-prescription"></i>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
                         {% endfor %}
                     {% else %}
-                        <div class="alert alert-info">
-                            Tidak ada riwayat konsultasi dengan pasien ini.
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times"></i>
+                            <h5>Tidak ada riwayat konsultasi</h5>
+                            <p>Pasien ini belum pernah berkonsultasi dengan Anda.</p>
                         </div>
                     {% endif %}
                 </div>
@@ -237,6 +286,7 @@
                             <div class="prescription-item">
                                 <div class="d-flex justify-content-between mb-2">
                                     <h6>Resep #{{ prescription.prescription_id }}</h6>
+                                    <small class="text-muted">{% now "d M Y" %}</small>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12 mb-2">
@@ -251,8 +301,13 @@
                             </div>
                         {% endfor %}
                     {% else %}
-                        <div class="alert alert-info">
-                            Tidak ada resep untuk pasien ini.
+                        <div class="empty-state">
+                            <i class="fas fa-prescription-bottle-alt"></i>
+                            <h5>Tidak ada resep</h5>
+                            <p>Anda belum memberikan resep untuk pasien ini.</p>
+                            <a href="{% url 'create_prescription' patient.patient_id %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Buat Resep Baru
+                            </a>
                         </div>
                     {% endif %}
                 </div>

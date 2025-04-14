@@ -238,7 +238,7 @@
                             {% if bill.amount > 0 %}
                                 +Rp {{ bill.amount|floatformat:0 }}
                             {% else %}
-                                -Rp {{ bill.amount|abs|floatformat:0 }}
+                                -Rp {{ bill.amount|floatformat:0 }}
                             {% endif %}
                         </div>
                     </div>

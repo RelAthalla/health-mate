@@ -232,7 +232,7 @@
             <div class="wallet-title">Saldo Saat Ini</div>
             <div class="wallet-balance">Rp {{ wallet_balance|floatformat:0 }}</div>
             <div class="wallet-actions">
-                <a href="{% url 'topup_wallet' %}" class="btn btn-light">
+                <a href="{% url 'payments_topup_wallet' %}" class="btn btn-light">
                     <i class="fas fa-plus me-2"></i>Top Up
                 </a>
                 <a href="{% url 'update_wallet_pin' %}" class="btn btn-outline-light">
@@ -251,7 +251,7 @@
             </div>
             <div class="quick-action-title">Top Up</div>
             <div class="quick-action-description">Tambah saldo ke wallet Anda</div>
-            <a href="{% url 'topup_wallet' %}" class="btn btn-primary btn-sm mt-3">Top Up</a>
+            <a href="{% url 'payments_topup_wallet' %}" class="btn btn-primary btn-sm mt-3">Top Up</a>
         </div>
         
         <div class="quick-action-card">

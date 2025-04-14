@@ -40,6 +40,44 @@ def profile(request):
     doctor_id = request.session.get('user_id')
     doctor = get_doctor(doctor_id)
     
+    if request.method == 'POST':
+        # Extract form data
+        data = {
+            'first_name': request.POST.get('first_name'),
+            'last_name': request.POST.get('last_name'),
+            'name': f"{request.POST.get('first_name')} {request.POST.get('last_name')}",
+            'phone': request.POST.get('phone'),
+            'sex': request.POST.get('sex'),
+            'specialization': request.POST.get('specialization'),
+            'experience': request.POST.get('experience'),
+            'birthdate': request.POST.get('birthdate'),
+            'address': request.POST.get('address')
+        }
+        
+        # Update doctor record
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE doctor SET 
+                first_name = %s, last_name = %s, name = %s, phone = %s, 
+                sex = %s, specialization = %s, experience = %s, 
+                birthdate = %s, address = %s
+                WHERE doctor_id = %s
+                """,
+                [
+                    data['first_name'], data['last_name'], data['name'], data['phone'],
+                    data['sex'], data['specialization'], data['experience'],
+                    data['birthdate'], data['address'], doctor_id
+                ]
+            )
+            
+        # Update session name if changed
+        request.session['user_name'] = data['name']
+        messages.success(request, 'Profile updated successfully.')
+        
+        # Fetch updated doctor data
+        doctor = get_doctor(doctor_id)
+    
     return render(request, 'doctor/profile.html', {'doctor': doctor})
 
 @doctor_required
@@ -188,7 +226,7 @@ def create_prescription_view(request, patient_id):
             else:
                 messages.error(request, "Failed to create prescription.")
     
-    return render(request, 'doctor/create_prescription.html', {'patient': patient})
+    return render(request, 'prescriptions/create_prescription.html', {'patient': patient})
 
 @doctor_required
 def schedule(request):

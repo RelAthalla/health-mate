@@ -23,29 +23,29 @@ def hash_password(password):
 
 # User authentication functions
 def authenticate_patient(phone, password):
-    hashed_password = hash_password(password)
+    # hashed_password = hash_password(password)
     with connection.cursor() as cursor:
         cursor.execute(
             "SELECT patient_id, name FROM patient WHERE phone = %s AND password = %s",
-            [phone, hashed_password]
+            [phone, password]
         )
         return dictfetchone(cursor)
 
 def authenticate_doctor(phone, password):
-    hashed_password = hash_password(password)
+    # hashed_password = hash_password(password)
     with connection.cursor() as cursor:
         cursor.execute(
             "SELECT doctor_id, name FROM doctor WHERE phone = %s AND password = %s",
-            [phone, hashed_password]
+            [phone, password]
         )
         return dictfetchone(cursor)
 
 def authenticate_admin(phone, password):
-    hashed_password = hash_password(password)
+    # hashed_password = hash_password(password)
     with connection.cursor() as cursor:
         cursor.execute(
             "SELECT admin_id, name FROM admin WHERE phone = %s AND password = %s",
-            [phone, hashed_password]
+            [phone, password]
         )
         return dictfetchone(cursor)
 
@@ -209,6 +209,15 @@ def get_patient_bills(patient_id):
             [patient_id]
         )
         return dictfetchall(cursor)
+
+def get_patient_phone(patient_id):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT phone FROM patient WHERE patient_id = %s",
+            [patient_id]
+        )
+        result = dictfetchone(cursor)
+        return result['phone'] if result else None
 
 def update_wallet_balance(patient_id, amount, wallet_pin):
     with connection.cursor() as cursor:
