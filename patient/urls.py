@@ -12,4 +12,5 @@ urlpatterns = [
     path('wallet/update-pin/', views.update_wallet_pin, name='update_wallet_pin'),
     path('wallet/topup/', views.topup_wallet, name='topup_wallet'),
     path('bills/', views.bills, name='patient_bills'),
+    path('invoice/<int:bill_id>/', views.invoice, name='invoice'),
 ]

@@ -271,3 +271,22 @@ def bills(request):
     return render(request, 'patient/bills.html', {
         'bills': bills
     })
+    
+@patient_required
+def invoice(request, bill_id):
+    """View invoice details"""
+    patient_id = request.session.get('user_id')
+    
+    # Check if bill exists and belongs to this patient
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT b.*, p.name as patient_name FROM bill b JOIN patient p ON b.patient_id = p.patient_id WHERE b.bill_id = %s AND b.patient_id = %s",
+            [bill_id, patient_id]
+        )
+        bill = dictfetchone(cursor)
+    
+    if not bill:
+        messages.error(request, "Invoice not found or you don't have permission to view it.")
+        return redirect('payment_history')
+    
+    return render(request, 'patient/invoice.html', {'bill': bill})

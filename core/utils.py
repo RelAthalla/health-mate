@@ -32,20 +32,20 @@ def authenticate_patient(phone, password):
         return dictfetchone(cursor)
 
 def authenticate_doctor(phone, password):
-    hashed_password = hash_password(password)
+    # hashed_password = hash_password(password)
     with connection.cursor() as cursor:
         cursor.execute(
             "SELECT doctor_id, name FROM doctor WHERE phone = %s AND password = %s",
-            [phone, hashed_password]
+            [phone, password]
         )
         return dictfetchone(cursor)
 
 def authenticate_admin(phone, password):
-    hashed_password = hash_password(password)
+    # hashed_password = hash_password(password)
     with connection.cursor() as cursor:
         cursor.execute(
             "SELECT admin_id, name FROM admin WHERE phone = %s AND password = %s",
-            [phone, hashed_password]
+            [phone, password]
         )
         return dictfetchone(cursor)
 

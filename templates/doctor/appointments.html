@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+
+{% block title %}Jadwal Konsultasi - HealthMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .tab-content {
+        padding: 20px 0;
+    }
+    
+    .appointment-item {
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .appointment-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .appointment-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+    
+    .appointment-date {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+    
+    .appointment-status {
+        font-size: 0.9rem;
+    }
+    
+    .appointment-info {
+        display: flex;
+        margin-bottom: 20px;
+    }
+    
+    .patient-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: rgba(52, 152, 219, 0.1);
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+    
+    .patient-info {
+        flex-grow: 1;
+    }
+    
+    .patient-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .patient-detail {
+        color: #555;
+        margin-bottom: 5px;
+    }
+    
+    .appointment-time {
+        color: #777;
+    }
+    
+    .appointment-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .empty-state {
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
+    
+    .empty-state h5 {
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .empty-state p {
+        color: #777;
+        margin-bottom: 20px;
+    }
+    
+    .blood-type-badge {
+        background-color: #e74c3c;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="fas fa-calendar-check me-2"></i>Jadwal Konsultasi</h2>
+                <p class="mb-0">Kelola jadwal konsultasi dengan pasien Anda</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'doctor_schedule' %}" class="btn btn-light">
+                    <i class="fas fa-calendar-alt me-2"></i>Lihat Jadwal Mingguan
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Appointment Tabs -->
+    <ul class="nav nav-tabs" id="appointmentTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab" aria-controls="upcoming" aria-selected="true">
+                <i class="fas fa-calendar-day me-2"></i>Jadwal Mendatang
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="past-tab" data-bs-toggle="tab" data-bs-target="#past" type="button" role="tab" aria-controls="past" aria-selected="false">
+                <i class="fas fa-history me-2"></i>Riwayat Konsultasi
+            </button>
+        </li>
+    </ul>
+    
+    <div class="tab-content" id="appointmentTabsContent">
+        <!-- Upcoming Appointments Tab -->
+        <div class="tab-pane fade show active" id="upcoming" role="tabpanel" aria-labelledby="upcoming-tab">
+            {% if upcoming_appointments %}
+                {% for appointment in upcoming_appointments %}
+                    <div class="appointment-item">
+                        <div class="appointment-header">
+                            <div class="appointment-date">
+                                {{ appointment.date|date:"l, d F Y" }}
+                            </div>
+                            <div class="appointment-status">
+                                <span class="badge bg-primary">Mendatang</span>
+                            </div>
+                        </div>
+                        
+                        <div class="appointment-info">
+                            <div class="patient-avatar">
+                                {{ appointment.patient_name|slice:":1" }}
+                            </div>
+                            <div class="patient-info">
+                                <div class="patient-name">{{ appointment.patient_name }}</div>
+                                <div class="patient-detail">
+                                    ID Pasien: {{ appointment.patient_id }}
+                                    {% if appointment.blood_type %}
+                                        <span class="blood-type-badge">{{ appointment.blood_type }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="appointment-time">
+                                    <i class="far fa-clock me-1"></i> {{ appointment.time|time:"H:i" }} WIB
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="appointment-actions">
+                            <a href="{% url 'doctor_patient_detail' appointment.patient_id %}" class="btn btn-outline-primary">
+                                <i class="fas fa-user-circle me-1"></i> Detail Pasien
+                            </a>
+                            <a href="{% url 'create_prescription' appointment.patient_id %}" class="btn btn-primary">
+                                <i class="fas fa-prescription me-1"></i> Buat Resep
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h5>Tidak Ada Jadwal Konsultasi</h5>
+                    <p>Anda belum memiliki jadwal konsultasi mendatang.</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Past Appointments Tab -->
+        <div class="tab-pane fade" id="past" role="tabpanel" aria-labelledby="past-tab">
+            {% if past_appointments %}
+                {% for appointment in past_appointments %}
+                    <div class="appointment-item">
+                        <div class="appointment-header">
+                            <div class="appointment-date">
+                                {{ appointment.date|date:"l, d F Y" }}
+                            </div>
+                            <div class="appointment-status">
+                                <span class="badge bg-success">Selesai</span>
+                            </div>
+                        </div>
+                        
+                        <div class="appointment-info">
+                            <div class="patient-avatar">
+                                {{ appointment.patient_name|slice:":1" }}
+                            </div>
+                            <div class="patient-info">
+                                <div class="patient-name">{{ appointment.patient_name }}</div>
+                                <div class="patient-detail">
+                                    ID Pasien: {{ appointment.patient_id }}
+                                    {% if appointment.blood_type %}
+                                        <span class="blood-type-badge">{{ appointment.blood_type }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="appointment-time">
+                                    <i class="far fa-clock me-1"></i> {{ appointment.time|time:"H:i" }} WIB
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="appointment-actions">
+                            <a href="{% url 'doctor_patient_detail' appointment.patient_id %}" class="btn btn-outline-primary">
+                                <i class="fas fa-user-circle me-1"></i> Detail Pasien
+                            </a>
+                            <a href="{% url 'create_prescription' appointment.patient_id %}" class="btn btn-outline-success">
+                                <i class="fas fa-prescription me-1"></i> Lihat/Buat Resep
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-history"></i>
+                    <h5>Tidak Ada Riwayat Konsultasi</h5>
+                    <p>Anda belum memiliki riwayat konsultasi.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
