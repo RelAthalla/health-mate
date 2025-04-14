@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Pasien Saya - HealthMate{% endblock %}
+{% block title %}Daftar Pasien - HealthMate{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -22,6 +22,7 @@
         transition: all 0.3s ease;
         margin-bottom: 20px;
         overflow: hidden;
+        height: 100%;
     }
     
     .patient-card:hover {
@@ -30,7 +31,8 @@
     }
     
     .patient-card .card-header {
-        background: rgba(52, 152, 219, 0.1);
+        background-color: rgba(52, 152, 219, 0.1);
+        padding: 15px;
         border-bottom: 1px solid rgba(52, 152, 219, 0.2);
     }
     
@@ -38,28 +40,88 @@
         padding: 20px;
     }
     
+    .patient-header {
+        display: flex;
+        align-items: center;
+    }
+    
+    .patient-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: bold;
+        margin-right: 15px;
+    }
+    
+    .patient-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .patient-id {
+        color: #777;
+        font-size: 0.9rem;
+    }
+    
     .patient-info {
         margin-bottom: 15px;
     }
     
-    .patient-info .label {
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    
+    .info-label {
         color: #777;
         font-size: 0.9rem;
-        margin-bottom: 0;
     }
     
-    .patient-info .value {
+    .info-value {
         font-weight: 500;
-        margin-bottom: 0;
     }
     
-    .badge-blood {
+    .blood-type-badge {
         background-color: #e74c3c;
         color: white;
         padding: 3px 8px;
         border-radius: 5px;
         font-size: 0.8rem;
         font-weight: 500;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+    }
+    
+    .empty-state {
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
+    
+    .empty-state h5 {
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .empty-state p {
+        color: #777;
+        margin-bottom: 20px;
     }
 </style>
 {% endblock %}
@@ -69,12 +131,16 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="row align-items-center">
-            <div class="col-md-6">
-                <h2><i class="fas fa-users me-2"></i>Pasien Saya</h2>
-                <p class="mb-0">Daftar pasien yang pernah berkonsultasi dengan Anda</p>
+            <div class="col-md-8">
+                <h2><i class="fas fa-users me-2"></i>Daftar Pasien</h2>
+                <p class="mb-0">Kelola pasien yang berkonsultasi dengan Anda</p>
             </div>
-            <div class="col-md-6 text-md-end">
-                <p class="mb-0">Total Pasien: <strong>{{ patients|length }}</strong></p>
+            <div class="col-md-4 text-md-end">
+                <div class="total-patients">
+                    <span class="badge bg-light text-dark">
+                        <i class="fas fa-user me-1"></i> Total Pasien: {{ patients|length }}
+                    </span>
+                </div>
             </div>
         </div>
     </div>
@@ -85,7 +151,10 @@
             <div class="card-body">
                 <form method="get" class="row g-3">
                     <div class="col-md-8">
-                        <input type="text" name="search" class="form-control" placeholder="Cari berdasarkan nama atau nomor telepon" value="{{ request.GET.search }}">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" placeholder="Cari berdasarkan nama atau nomor telepon" name="search" value="{{ request.GET.search }}">
+                        </div>
                     </div>
                     <div class="col-md-2">
                         <select name="blood_type" class="form-select">
@@ -97,54 +166,48 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search me-2"></i>Cari
-                        </button>
+                        <button type="submit" class="btn btn-primary w-100">Cari</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
     
-    <!-- Patients List -->
+    <!-- Patients Grid -->
     <div class="row">
         {% if patients %}
             {% for patient in patients %}
-                <div class="col-md-6 col-xl-4">
+                <div class="col-md-6 col-lg-4">
                     <div class="patient-card card">
-                        <div class="card-header">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0">
-                                    <div class="avatar-placeholder bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px; font-size: 18px;">
-                                        {{ patient.name|slice:":1" }}
-                                    </div>
-                                </div>
-                                <div class="flex-grow-1 ms-3">
-                                    <h5 class="card-title mb-0">{{ patient.name }}</h5>
-                                    <small class="text-muted">ID: {{ patient.patient_id }}</small>
+                        <div class="card-header position-relative">
+                            <div class="patient-header">
+                                <div class="patient-avatar">
+                                    {{ patient.name|slice:":1" }}
                                 </div>
                                 <div>
-                                    <span class="badge-blood">{{ patient.blood_type }}</span>
+                                    <div class="patient-name">{{ patient.name }}</div>
+                                    <div class="patient-id">ID: {{ patient.patient_id }}</div>
                                 </div>
                             </div>
+                            <span class="blood-type-badge">{{ patient.blood_type }}</span>
                         </div>
                         <div class="card-body">
-                            <div class="patient-info row">
-                                <div class="col-6">
-                                    <p class="label">Jenis Kelamin</p>
-                                    <p class="value">{{ patient.sex }}</p>
+                            <div class="patient-info">
+                                <div class="info-row">
+                                    <span class="info-label">Jenis Kelamin</span>
+                                    <span class="info-value">{{ patient.sex }}</span>
                                 </div>
-                                <div class="col-6">
-                                    <p class="label">No. Telepon</p>
-                                    <p class="value">{{ patient.phone }}</p>
+                                <div class="info-row">
+                                    <span class="info-label">No. Telepon</span>
+                                    <span class="info-value">{{ patient.phone }}</span>
                                 </div>
                             </div>
                             
                             <div class="d-grid gap-2">
                                 <a href="{% url 'doctor_patient_detail' patient.patient_id %}" class="btn btn-outline-primary">
-                                    <i class="fas fa-user-circle me-2"></i>Lihat Detail
+                                    <i class="fas fa-user-circle me-2"></i>Detail Pasien
                                 </a>
-                                <a href="{% url 'create_prescription' patient.patient_id %}" class="btn btn-outline-success">
+                                <a href="{% url 'create_prescription' patient.patient_id %}" class="btn btn-primary">
                                     <i class="fas fa-prescription me-2"></i>Buat Resep
                                 </a>
                             </div>
@@ -154,8 +217,10 @@
             {% endfor %}
         {% else %}
             <div class="col-12">
-                <div class="alert alert-info">
-                    Tidak ada pasien yang ditemukan.
+                <div class="empty-state">
+                    <i class="fas fa-user-friends"></i>
+                    <h5>Tidak Ada Pasien</h5>
+                    <p>Anda belum memiliki pasien yang terdaftar.</p>
                 </div>
             </div>
         {% endif %}

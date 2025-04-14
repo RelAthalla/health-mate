@@ -7,7 +7,7 @@ from .utils import get_all_doctors, get_doctors_by_specialization
 
 def home(request):
     """Home page view"""
-
+    # Check if user is logged in and redirect to appropriate dashboard
     if 'user_type' in request.session:
         user_type = request.session['user_type']
         if user_type == 'patient':
@@ -16,13 +16,11 @@ def home(request):
             return redirect('doctor_dashboard')
         elif user_type == 'admin':
             return redirect('admin_dashboard')
-        
     # Get featured doctors for home page
     featured_doctors = get_all_doctors()[:4]  # Limit to 4 doctors
     
     context = {
         'featured_doctors': featured_doctors,
-        # 'user_type': user_type
     }
     
     return render(request, 'home.html', context)
