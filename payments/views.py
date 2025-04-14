@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db import connection
@@ -91,7 +92,7 @@ def topup_wallet(request):
             return render(request, 'payments/topup_wallet.html', {'wallet_balance': wallet_balance})
         
         try:
-            amount = float(amount)
+            amount = Decimal(amount)
             if amount <= 0:
                 messages.error(request, "Amount must be greater than zero.")
                 return render(request, 'payments/topup_wallet.html', {'wallet_balance': wallet_balance})
