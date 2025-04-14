@@ -7,7 +7,7 @@ from core.utils import (
     get_patient, update_patient, get_patient_appointments,
     get_patient_prescriptions, get_patient_bills,
     update_wallet_balance, get_all_doctors, get_doctors_by_specialization,
-    hash_password, dictfetchone, get_patient_bills_paid, get_patient_bills_topup, get_patient_bills_topup_or_paid
+    hash_password, dictfetchone, get_patient_bills_paid, get_patient_bills_topup, get_patient_bills_topup_or_paid, get_patient_phone
 )
 from .forms import PatientProfileForm, WalletPinForm, WalletTopUpForm
 import firebase_admin
