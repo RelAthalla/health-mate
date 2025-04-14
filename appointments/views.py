@@ -34,7 +34,7 @@ def book_appointment(request, doctor_id=None):
             time_str = form.cleaned_data['time']
             
             # Convert time string to time object
-            appointment_time = datetime.strptime(time_str, '%H:%M').time()
+            appointment_time = form.cleaned_data['time']
             
             # Check if the appointment slot is available
             with connection.cursor() as cursor:

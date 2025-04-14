@@ -36,6 +36,5 @@ class AppointmentForm(forms.Form):
                 time_str = current_time.strftime('%H:%M')
                 display_str = current_time.strftime('%I:%M %p')
                 time_choices.append((time_str, display_str))
-                current_time = (datetime.combine(datetime.today(), current_time.time()) + timedelta(minutes=30)).time()
-        
+                current_time += timedelta(minutes=30)  # Tetap sebagai datetime
         self.fields['time'].widget.choices = time_choices
