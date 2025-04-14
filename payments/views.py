@@ -7,6 +7,7 @@ from core.utils import (
     get_patient, get_patient_bills, pay_from_wallet,
     update_wallet_balance, create_bill, dictfetchone
 )
+from patient.views import bills
 
 @patient_required
 def payment_history(request):
@@ -40,7 +41,7 @@ def pay_bill(request, bill_id):
     
     if not bill:
         messages.error(request, "Bill not found or you don't have permission to view it.")
-        return redirect('payment_history')
+        return redirect('patient_bills')
     
     # Get patient's wallet balance
     patient = get_patient(patient_id)
@@ -58,12 +59,12 @@ def pay_bill(request, bill_id):
             # Update bill status
             with connection.cursor() as cursor:
                 cursor.execute(
-                    "DELETE FROM bill WHERE bill_id = %s",
+                    "UPDATE bill SET status = 'Paid' WHERE bill_id = %s",
                     [bill_id]
                 )
             
             messages.success(request, "Payment successful.")
-            return redirect('payment_history')
+            return redirect('patient_bills')
         else:
             messages.error(request, "Payment failed. Please check your wallet balance and PIN.")
     
@@ -139,3 +140,22 @@ def invoice(request, bill_id):
         return redirect('payment_history')
     
     return render(request, 'payments/invoice.html', {'bill': bill})
+
+@patient_required
+def invoice_topup(request, bill_id):
+    """View invoice details"""
+    patient_id = request.session.get('user_id')
+    
+    # Check if bill exists and belongs to this patient
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT b.*, p.name as patient_name FROM bill b JOIN patient p ON b.patient_id = p.patient_id WHERE b.bill_id = %s AND b.patient_id = %s",
+            [bill_id, patient_id]
+        )
+        bill = dictfetchone(cursor)
+    
+    if not bill:
+        messages.error(request, "Invoice not found or you don't have permission to view it.")
+        return redirect('payment_history')
+    
+    return render(request, 'payments/invoice_topup.html', {'bill': bill})

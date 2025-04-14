@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Daftar Tagihan - HealthMate{% endblock %}
+{% block title %}Riwayat Pembayaran - HealthMate{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -146,13 +146,10 @@
     <div class="page-header">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h2><i class="fas fa-file-invoice me-2"></i>Daftar Tagihan</h2>
-                <p class="mb-0">Kelola dan bayar tagihan HealthMate Anda</p>
+                <h2><i class="fas fa-history me-2"></i>Riwayat Pembayaran</h2>
+                <p class="mb-0">Lihat riwayat transaksi pembayaran HealthMate Anda</p>
             </div>
             <div class="col-md-4 text-md-end">
-                <a href="{% url 'patient_bills_paid' %}" class="btn btn-outline-light me-2">
-                    <i class="fas fa-history me-2"></i>Riwayat Pembayaran
-                </a>
                 <a href="{% url 'patient_wallet' %}" class="btn btn-light">
                     <i class="fas fa-arrow-left me-2"></i>Kembali
                 </a>
@@ -160,17 +157,71 @@
         </div>
     </div>
     
-    <!-- Bills Card -->
+    <!-- Top Up Card -->
     <div class="bills-card">
         <div class="card-header">
-            <h5><i class="fas fa-file-invoice-dollar me-2"></i>Tagihan Belum Lunas</h5>
+            <h5><i class="fas fa-wallet me-2"></i>Riwayat Top Up</h5>
+        </div>
+        
+        <!-- Filters -->
+        <div class="bill-filters">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" placeholder="Cari transaksi">
+                </div>
+                <div class="col-md-4">
+                    <input type="date" class="form-control" placeholder="Tanggal mulai">
+                </div>
+                <div class="col-md-4">
+                    <input type="date" class="form-control" placeholder="Tanggal akhir">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top Up List -->
+        {% if topup %}
+            {% for bill in topup %}
+                <div class="bill-item">
+                    <div class="bill-header">
+                        <div class="bill-id">Transaksi #{{ bill.bill_id }}</div>
+                        <div class="bill-date">{{ bill.date|date:"d F Y" }} | {{ bill.time|time:"H:i" }}</div>
+                    </div>
+                    <div class="bill-details">
+                        <div class="bill-description">Top Up Wallet</div>
+                        <div class="bill-amount credit">+Rp {{ bill.amount|floatformat:0 }}</div>
+                    </div>
+                    <div class="bill-actions d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="bill-status paid">Berhasil</span>
+                        </div>
+                        <div>
+                            <a href="{% url 'invoice' bill.bill_id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-receipt me-1"></i> Lihat Bukti
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-wallet"></i>
+                <h5>Tidak Ada Riwayat Top Up</h5>
+                <p>Anda belum melakukan top up wallet.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Paid Bills Card -->
+    <div class="bills-card">
+        <div class="card-header">
+            <h5><i class="fas fa-check-circle me-2"></i>Tagihan Lunas</h5>
         </div>
         
         <!-- Filters -->
         <div class="bill-filters">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <input type="text" class="form-control" placeholder="Cari tagihan">
+                    <input type="text" class="form-control" placeholder="Cari pembayaran">
                 </div>
                 <div class="col-md-4">
                     <select class="form-select">
@@ -183,9 +234,9 @@
             </div>
         </div>
         
-        <!-- Bills List -->
-        {% if bills %}
-            {% for bill in bills %}
+        <!-- Paid Bills List -->
+        {% if bills_paid %}
+            {% for bill in bills_paid %}
                 <div class="bill-item">
                     <div class="bill-header">
                         <div class="bill-id">Tagihan #{{ bill.bill_id }}</div>
@@ -196,19 +247,16 @@
                             Pembayaran Konsultasi Dokter
                         </div>
                         <div class="bill-amount debit">
-                            Rp {{ bill.amount|floatformat:0 }}
+                            -Rp {{ bill.amount|floatformat:0 }}
                         </div>
                     </div>
                     <div class="bill-actions d-flex justify-content-between align-items-center">
                         <div>
-                            <span class="bill-status unpaid">Belum Lunas</span>
+                            <span class="bill-status paid">Lunas</span>
                         </div>
                         <div>
                             <a href="{% url 'invoice' bill.bill_id %}" class="btn btn-sm btn-outline-primary">
                                 <i class="fas fa-eye me-1"></i> Lihat Detail
-                            </a>
-                            <a href="{% url 'pay_bill' bill.bill_id %}" class="btn btn-sm btn-primary">
-                                <i class="fas fa-credit-card me-1"></i> Bayar
                             </a>
                         </div>
                     </div>
@@ -216,9 +264,9 @@
             {% endfor %}
         {% else %}
             <div class="empty-state">
-                <i class="fas fa-file-invoice"></i>
-                <h5>Tidak Ada Tagihan</h5>
-                <p>Saat ini Anda tidak memiliki tagihan yang perlu dibayar.</p>
+                <i class="fas fa-check-circle"></i>
+                <h5>Tidak Ada Tagihan Lunas</h5>
+                <p>Anda belum memiliki tagihan yang sudah dibayar.</p>
             </div>
         {% endif %}
     </div>

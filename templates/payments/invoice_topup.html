@@ -191,7 +191,7 @@
                 <p class="mb-0">Detail tagihan dan pembayaran</p>
             </div>
             <div class="col-md-4 text-md-end">
-                <a href="{% url 'patient_bills_paid' %}" class="btn btn-light">
+                <a href="{% url 'payment_history' %}" class="btn btn-light">
                     <i class="fas fa-arrow-left me-2"></i>Kembali ke Riwayat Pembayaran
                 </a>
             </div>
@@ -248,7 +248,7 @@
                                 <div class="detail-row">
                                     <div class="detail-label">Status:</div>
                                     <div class="detail-value">
-                                        {% if bill.status == 'Paid' or bill.status == 'Topup' %}
+                                        {% if bill.amount > 0 %}
                                             <span class="payment-badge paid">Lunas</span>
                                         {% else %}
                                             <span class="payment-badge unpaid">Belum Lunas</span>
@@ -311,23 +311,19 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% if bill.status == 'Paid' or bill.status == 'Unpaid' %}
+                                    {% if bill.amount > 0 %}
                                         <tr>
-                                            <td>Harga Konsultasi</td>
+                                            <td>Biaya Top Up</td>
                                             <td class="text-end">Rp {{ bill.amount|floatformat:0 }}</td>
                                         </tr>
                                         <tr>
-                                            <td>Biaya Layanan</td>
+                                            <td>Biaya Admin</td>
                                             <td class="text-end">Rp 0</td>
                                         </tr>
                                     {% else %}
                                         <tr>
-                                            <td>Harga Topup</td>
+                                            <td>Biaya Top Up</td>
                                             <td class="text-end">Rp {{ bill.amount|floatformat:0 }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Biaya Layanan</td>
-                                            <td class="text-end">Rp 0</td>
                                         </tr>
                                     {% endif %}
                                     <tr class="total-row">
@@ -368,7 +364,7 @@
                         <i class="fas fa-credit-card me-2"></i>Bayar Sekarang
                     </a>
                 {% else %}
-                    <a href="{% url 'patient_bills_paid' %}" class="btn btn-outline-primary">
+                    <a href="{% url 'payment_history' %}" class="btn btn-outline-primary">
                         <i class="fas fa-arrow-left me-2"></i>Kembali ke Riwayat Pembayaran
                     </a>
                 {% endif %}

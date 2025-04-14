@@ -230,7 +230,7 @@
                 <div class="topup-body">
                     <div class="wallet-balance">
                         <div class="balance-label">Saldo Saat Ini</div>
-                        <div class="balance-amount">Rp {{ form.initial.wallet_balance|default:0|floatformat:0 }}</div>
+                        <div class="balance-amount">Rp {{ patient.wallet_balance|default:0|floatformat:0 }}</div>
                     </div>
                     
                     <form method="post" id="topupForm">
