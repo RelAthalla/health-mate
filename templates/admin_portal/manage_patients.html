@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+
+{% block title %}Kelola Pasien - HealthMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .search-area {
+        margin-bottom: 20px;
+    }
+    
+    .patient-card {
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    
+    .patient-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .patient-card .card-header {
+        background: rgba(52, 152, 219, 0.1);
+        border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+    }
+    
+    .patient-card .card-body {
+        padding: 20px;
+    }
+    
+    .patient-info {
+        margin-bottom: 15px;
+    }
+    
+    .patient-info .label {
+        color: #777;
+        font-size: 0.9rem;
+        margin-bottom: 0;
+    }
+    
+    .patient-info .value {
+        font-weight: 500;
+        margin-bottom: 0;
+    }
+    
+    .badge-blood {
+        background-color: #e74c3c;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .patient-stats {
+        background-color: #f9f9f9;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        border-radius: 5px;
+        padding: 15px;
+        text-align: center;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .stat-card i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        color: var(--primary-color);
+    }
+    
+    .stat-card .count {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    .stat-card .label {
+        color: #777;
+    }
+    
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h2><i class="fas fa-users me-2"></i>Kelola Pasien</h2>
+                <p class="mb-0">Daftar semua pasien yang terdaftar di sistem</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <p class="mb-0">Total Pasien: <strong>{{ patients|length }}</strong></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Patient Stats -->
+    <div class="patient-stats">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <div class="count">{{ patients|length }}</div>
+                    <div class="label">Total Pasien</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-male"></i>
+                    <div class="count">{{ patients|length }}</div>
+                    <div class="label">Laki-laki</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-female"></i>
+                    <div class="count">{{ patients|length }}</div>
+                    <div class="label">Perempuan</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-calendar-alt"></i>
+                    <div class="count">{{ patients|length }}</div>
+                    <div class="label">Pasien Baru Bulan Ini</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Search Area -->
+    <div class="search-area">
+        <div class="card">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" name="search" class="form-control" placeholder="Cari berdasarkan nama atau nomor telepon" value="{{ request.GET.search }}">
+                    </div>
+                    <div class="col-md-3">
+                        <select name="blood_type" class="form-select">
+                            <option value="">Semua Golongan Darah</option>
+                            <option value="A" {% if request.GET.blood_type == 'A' %}selected{% endif %}>A</option>
+                            <option value="B" {% if request.GET.blood_type == 'B' %}selected{% endif %}>B</option>
+                            <option value="AB" {% if request.GET.blood_type == 'AB' %}selected{% endif %}>AB</option>
+                            <option value="O" {% if request.GET.blood_type == 'O' %}selected{% endif %}>O</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="sex" class="form-select">
+                            <option value="">Semua Jenis Kelamin</option>
+                            <option value="Laki-laki" {% if request.GET.sex == 'Laki-laki' %}selected{% endif %}>Laki-laki</option>
+                            <option value="Perempuan" {% if request.GET.sex == 'Perempuan' %}selected{% endif %}>Perempuan</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-2"></i>Cari
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Patients List -->
+    <div class="row">
+        {% if patients %}
+            {% for patient in patients %}
+                <div class="col-md-6 col-xl-4">
+                    <div class="patient-card card">
+                        <div class="card-header">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="avatar-placeholder bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px; font-size: 18px;">
+                                        {{ patient.name|slice:":1" }}
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h5 class="card-title mb-0">{{ patient.name }}</h5>
+                                    <small class="text-muted">ID: {{ patient.patient_id }}</small>
+                                </div>
+                                <div>
+                                    <span class="badge-blood">{{ patient.blood_type }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="patient-info row">
+                                <div class="col-6">
+                                    <p class="label">Jenis Kelamin</p>
+                                    <p class="value">{{ patient.sex }}</p>
+                                </div>
+                                <div class="col-6">
+                                    <p class="label">Tanggal Lahir</p>
+                                    <p class="value">{{ patient.birthdate|date:"d M Y" }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="patient-info row">
+                                <div class="col-6">
+                                    <p class="label">No. Telepon</p>
+                                    <p class="value">{{ patient.phone }}</p>
+                                </div>
+                                <div class="col-6">
+                                    <p class="label">Saldo Wallet</p>
+                                    <p class="value">Rp {{ patient.wallet_balance|floatformat:0 }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 mt-3">
+                                <a href="{% url 'admin_patient_detail' patient.patient_id %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-user-circle me-2"></i>Lihat Detail
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    Tidak ada pasien yang ditemukan.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if patients.has_other_pages %}
+        <div class="pagination-container">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if patients.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.blood_type %}&blood_type={{ request.GET.blood_type }}{% endif %}{% if request.GET.sex %}&sex={{ request.GET.sex }}{% endif %}" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ patients.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.blood_type %}&blood_type={{ request.GET.blood_type }}{% endif %}{% if request.GET.sex %}&sex={{ request.GET.sex }}{% endif %}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo;&laquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">&laquo;</span>
+                        </li>
+                    {% endif %}
+                    
+                    {% for i in patients.paginator.page_range %}
+                        {% if patients.number == i %}
+                            <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                        {% elif i > patients.number|add:'-3' and i < patients.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ i }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.blood_type %}&blood_type={{ request.GET.blood_type }}{% endif %}{% if request.GET.sex %}&sex={{ request.GET.sex }}{% endif %}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if patients.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ patients.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.blood_type %}&blood_type={{ request.GET.blood_type }}{% endif %}{% if request.GET.sex %}&sex={{ request.GET.sex }}{% endif %}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ patients.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.blood_type %}&blood_type={{ request.GET.blood_type }}{% endif %}{% if request.GET.sex %}&sex={{ request.GET.sex }}{% endif %}" aria-label="Last">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">&raquo;&raquo;</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

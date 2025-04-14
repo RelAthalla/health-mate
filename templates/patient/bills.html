@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% block title %}Tagihan - HealthMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .bills-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .card-header {
+        background-color: rgba(52, 152, 219, 0.1);
+        padding: 15px 20px;
+        border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+    }
+    
+    .card-header h5 {
+        margin-bottom: 0;
+        color: var(--primary-color);
+    }
+    
+    .bill-filters {
+        padding: 15px 20px;
+        background-color: #f9f9f9;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .bill-item {
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+        transition: all 0.3s ease;
+    }
+    
+    .bill-item:last-child {
+        border-bottom: none;
+    }
+    
+    .bill-item:hover {
+        background-color: rgba(52, 152, 219, 0.05);
+    }
+    
+    .bill-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    
+    .bill-id {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+    
+    .bill-date {
+        color: #777;
+        font-size: 0.9rem;
+    }
+    
+    .bill-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .bill-description {
+        font-weight: 500;
+    }
+    
+    .bill-amount {
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+    
+    .bill-amount.credit {
+        color: #2ecc71;
+    }
+    
+    .bill-amount.debit {
+        color: #e74c3c;
+    }
+    
+    .bill-actions {
+        margin-top: 10px;
+    }
+    
+    .bill-status {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .bill-status.paid {
+        background-color: rgba(46, 204, 113, 0.1);
+        color: #2ecc71;
+    }
+    
+    .bill-status.unpaid {
+        background-color: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+    }
+    
+    .bill-status.processing {
+        background-color: rgba(243, 156, 18, 0.1);
+        color: #f39c12;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 30px;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #ddd;
+        margin-bottom: 15px;
+    }
+    
+    .empty-state h5 {
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .empty-state p {
+        color: #777;
+        margin-bottom: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="fas fa-file-invoice me-2"></i>Tagihan</h2>
+                <p class="mb-0">Kelola dan bayar tagihan HealthMate Anda</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'patient_dashboard' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>Kembali ke Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bills Card -->
+    <div class="bills-card">
+        <div class="card-header">
+            <h5><i class="fas fa-file-invoice-dollar me-2"></i>Daftar Tagihan</h5>
+        </div>
+        
+        <!-- Filters -->
+        <div class="bill-filters">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" placeholder="Cari tagihan">
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select">
+                        <option selected>Semua Jenis</option>
+                        <option>Konsultasi</option>
+                        <option>Top Up</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select">
+                        <option selected>Semua Status</option>
+                        <option>Lunas</option>
+                        <option>Belum Lunas</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bills List -->
+        {% if bills %}
+            {% for bill in bills %}
+                <div class="bill-item">
+                    <div class="bill-header">
+                        <div class="bill-id">Tagihan #{{ bill.bill_id }}</div>
+                        <div class="bill-date">{{ bill.date|date:"d F Y" }} | {{ bill.time|time:"H:i" }}</div>
+                    </div>
+                    <div class="bill-details">
+                        <div class="bill-description">
+                            {% if bill.amount > 0 %}
+                                Top Up Wallet
+                            {% else %}
+                                Pembayaran Konsultasi Dokter
+                            {% endif %}
+                        </div>
+                        <div class="bill-amount {% if bill.amount > 0 %}credit{% else %}debit{% endif %}">
+                            {% if bill.amount > 0 %}
+                                +Rp {{ bill.amount|floatformat:0 }}
+                            {% else %}
+                                -Rp {{ bill.amount|floatformat:0 }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="bill-actions d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if bill.amount < 0 %}
+                                <span class="bill-status unpaid">Belum Lunas</span>
+                            {% else %}
+                                <span class="bill-status paid">Lunas</span>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <a href="{% url 'invoice' bill.bill_id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i> Lihat Detail
+                            </a>
+                            {% if bill.amount < 0 %}
+                                <a href="{% url 'pay_bill' bill.bill_id %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-credit-card me-1"></i> Bayar
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-file-invoice"></i>
+                <h5>Tidak Ada Tagihan</h5>
+                <p>Saat ini Anda tidak memiliki tagihan yang perlu dibayar.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Payment History Card -->
+    <div class="bills-card">
+        <div class="card-header">
+            <h5><i class="fas fa-history me-2"></i>Riwayat Pembayaran</h5>
+        </div>
+        
+        <!-- Payment History List -->
+        {% if bills %}
+            {% for bill in bills %}
+                {% if bill.amount > 0 %}
+                    <div class="bill-item">
+                        <div class="bill-header">
+                            <div class="bill-id">Transaksi #{{ bill.bill_id }}</div>
+                            <div class="bill-date">{{ bill.date|date:"d F Y" }} | {{ bill.time|time:"H:i" }}</div>
+                        </div>
+                        <div class="bill-details">
+                            <div class="bill-description">Top Up Wallet</div>
+                            <div class="bill-amount credit">+Rp {{ bill.amount|floatformat:0 }}</div>
+                        </div>
+                        <div class="bill-actions d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="bill-status paid">Berhasil</span>
+                            </div>
+                            <div>
+                                <a href="{% url 'invoice' bill.bill_id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-receipt me-1"></i> Lihat Bukti
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-history"></i>
+                <h5>Tidak Ada Riwayat Pembayaran</h5>
+                <p>Anda belum melakukan pembayaran apa pun.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

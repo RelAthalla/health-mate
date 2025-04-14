@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+
+{% block title %}Bayar Tagihan - HealthMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .payment-card {
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .bill-details {
+        background-color: rgba(52, 152, 219, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .bill-details h5 {
+        color: var(--primary-color);
+        margin-bottom: 15px;
+    }
+    
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    
+    .detail-row:last-child {
+        margin-bottom: 0;
+    }
+    
+    .detail-label {
+        font-weight: 500;
+        color: #555;
+    }
+    
+    .detail-value {
+        font-weight: 600;
+    }
+    
+    .wallet-balance {
+        background-color: rgba(46, 204, 113, 0.1);
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .wallet-balance .balance-label {
+        font-weight: 500;
+        color: #555;
+    }
+    
+    .wallet-balance .balance-value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--secondary-color);
+    }
+    
+    .payment-method {
+        margin-bottom: 20px;
+    }
+    
+    .payment-summary {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    
+    .total-amount {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-top: 10px;
+        text-align: center;
+    }
+    
+    /* Status Indicators */
+    .status-success {
+        background-color: rgba(46, 204, 113, 0.1);
+        color: #27ae60;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .status-success i {
+        font-size: 3rem;
+        margin-bottom: 10px;
+    }
+    
+    .status-success h5 {
+        color: #27ae60;
+        margin-bottom: 5px;
+    }
+    
+    .status-error {
+        background-color: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .status-error i {
+        font-size: 3rem;
+        margin-bottom: 10px;
+    }
+    
+    .status-error h5 {
+        color: #e74c3c;
+        margin-bottom: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="fas fa-credit-card me-2"></i>Bayar Tagihan</h2>
+                <p class="mb-0">Bayar tagihan layanan HealthMate</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'patient_bills' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>Kembali ke Daftar Tagihan
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="payment-card card">
+                <div class="card-body p-4">
+                    <!-- Success Message (Show only if payment successful) -->
+                    <!-- <div class="status-success">
+                        <i class="fas fa-check-circle"></i>
+                        <h5>Pembayaran Berhasil!</h5>
+                        <p>Terima kasih atas pembayaran Anda. Transaksi telah berhasil diproses.</p>
+                    </div> -->
+                    
+                    <!-- Error Message (Show only if payment failed) -->
+                    <!-- <div class="status-error">
+                        <i class="fas fa-times-circle"></i>
+                        <h5>Pembayaran Gagal!</h5>
+                        <p>Maaf, terjadi kesalahan dalam memproses pembayaran Anda. Silakan coba lagi.</p>
+                    </div> -->
+                    
+                    <!-- Bill Details -->
+                    <div class="bill-details">
+                        <h5><i class="fas fa-file-invoice me-2"></i>Detail Tagihan</h5>
+                        <div class="detail-row">
+                            <span class="detail-label">ID Tagihan</span>
+                            <span class="detail-value">#{{ bill.bill_id }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Tanggal</span>
+                            <span class="detail-value">{{ bill.date|date:"d F Y" }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Waktu</span>
+                            <span class="detail-value">{{ bill.time|time:"H:i" }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Deskripsi</span>
+                            <span class="detail-value">Konsultasi Dokter</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Jumlah</span>
+                            <span class="detail-value">Rp {{ bill.amount|floatformat:0 }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Wallet Balance -->
+                    <div class="wallet-balance">
+                        <span class="balance-label">Saldo Wallet Anda</span>
+                        <span class="balance-value">Rp {{ wallet_balance|floatformat:0 }}</span>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Payment Method -->
+                        <div class="payment-method">
+                            <label class="form-label">Metode Pembayaran</label>
+                            <select class="form-select" name="payment_method" id="paymentMethod">
+                                <option value="wallet" selected>HealthMate Wallet</option>
+                            </select>
+                            <div class="form-text">Saat ini pembayaran hanya dapat dilakukan melalui HealthMate Wallet.</div>
+                        </div>
+                        
+                        <!-- Wallet PIN -->
+                        <div class="mb-4">
+                            <label for="wallet_pin" class="form-label">PIN Wallet</label>
+                            <input type="password" class="form-control" id="wallet_pin" name="wallet_pin" placeholder="Masukkan 6 digit PIN" maxlength="6" pattern="[0-9]{6}" required>
+                            <div class="form-text">Masukkan 6 digit PIN wallet Anda untuk konfirmasi pembayaran</div>
+                        </div>
+                        
+                        <!-- Payment Summary -->
+                        <div class="payment-summary">
+                            <div class="detail-row">
+                                <span class="detail-label">Jumlah Tagihan</span>
+                                <span class="detail-value">Rp {{ bill.amount|floatformat:0 }}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Biaya Layanan</span>
+                                <span class="detail-value">Rp 0</span>
+                            </div>
+                            <hr>
+                            <div class="detail-row">
+                                <span class="detail-label">Total Pembayaran</span>
+                                <span class="detail-value">Rp {{ bill.amount|floatformat:0 }}</span>
+                            </div>
+                            
+                            <div class="total-amount">Rp {{ bill.amount|floatformat:0 }}</div>
+                        </div>
+                        
+                        {% if wallet_balance < bill.amount %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Saldo wallet Anda tidak mencukupi untuk melakukan pembayaran ini.
+                                <a href="{% url 'topup_wallet' %}" class="alert-link">Top up wallet sekarang</a>.
+                            </div>
+                            <div class="d-grid">
+                                <button type="button" class="btn btn-primary btn-lg" disabled>
+                                    <i class="fas fa-credit-card me-2"></i>Bayar Sekarang
+                                </button>
+                            </div>
+                        {% else %}
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                                <label class="form-check-label" for="agreeTerms">
+                                    Saya setuju untuk melakukan pembayaran sebesar Rp {{ bill.amount|floatformat:0 }}
+                                </label>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-credit-card me-2"></i>Bayar Sekarang
+                                </button>
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

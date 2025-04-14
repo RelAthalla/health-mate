@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}Update Wallet PIN - HealthMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .pin-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .pin-header {
+        background-color: rgba(52, 152, 219, 0.1);
+        padding: 20px;
+        border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+        text-align: center;
+    }
+    
+    .pin-icon {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin-bottom: 15px;
+    }
+    
+    .pin-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 5px;
+    }
+    
+    .pin-subtitle {
+        color: #777;
+    }
+    
+    .pin-body {
+        padding: 30px;
+    }
+    
+    .pin-security-note {
+        background-color: rgba(243, 156, 18, 0.1);
+        border-left: 4px solid var(--warning-color);
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+    
+    .pin-security-note h6 {
+        color: var(--warning-color);
+        margin-bottom: 10px;
+    }
+    
+    .pin-security-note ul {
+        margin-bottom: 0;
+        padding-left: 20px;
+    }
+    
+    .pin-security-note li {
+        margin-bottom: 5px;
+    }
+    
+    .pin-security-note li:last-child {
+        margin-bottom: 0;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .pin-input {
+        font-family: monospace;
+        letter-spacing: 0.5em;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="fas fa-key me-2"></i>Update Wallet PIN</h2>
+                <p class="mb-0">Ubah PIN wallet HealthMate Anda</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'patient_wallet' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>Kembali ke Wallet
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="pin-card">
+                <div class="pin-header">
+                    <div class="pin-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="pin-title">Update Wallet PIN</div>
+                    <div class="pin-subtitle">PIN digunakan untuk melakukan transaksi di wallet Anda</div>
+                </div>
+                
+                <div class="pin-body">
+                    <div class="pin-security-note">
+                        <h6><i class="fas fa-shield-alt me-2"></i>Catatan Keamanan</h6>
+                        <ul>
+                            <li>PIN terdiri dari 6 digit angka.</li>
+                            <li>Jangan gunakan kombinasi yang mudah ditebak seperti 123456 atau 000000.</li>
+                            <li>Jangan bagikan PIN Anda kepada siapapun.</li>
+                            <li>Mengingat PIN Anda sendiri, jangan disimpan di tempat yang mudah diakses orang lain.</li>
+                        </ul>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="{{ form.current_pin.id_for_label }}" class="form-label">PIN Saat Ini</label>
+                            {{ form.current_pin }}
+                            {% if form.current_pin.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.current_pin.errors }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Masukkan 6 digit PIN wallet Anda saat ini</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.new_pin.id_for_label }}" class="form-label">PIN Baru</label>
+                            {{ form.new_pin }}
+                            {% if form.new_pin.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.new_pin.errors }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Masukkan 6 digit PIN baru</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.confirm_pin.id_for_label }}" class="form-label">Konfirmasi PIN Baru</label>
+                            {{ form.confirm_pin }}
+                            {% if form.confirm_pin.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.confirm_pin.errors }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Masukkan kembali 6 digit PIN baru Anda</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Update PIN
+                            </button>
+                            <a href="{% url 'patient_wallet' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Batal
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add custom behavior for PIN inputs
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add PIN input class to style them
+        const pinInputs = document.querySelectorAll('input[name$="pin"]');
+        pinInputs.forEach(input => {
+            input.classList.add('pin-input');
+        });
+    });
+</script>
+{% endblock %}

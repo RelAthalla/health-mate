@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+
+{% block title %}Top Up Wallet - HealthMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .topup-card {
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .wallet-balance {
+        background-color: rgba(46, 204, 113, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .wallet-balance h3 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--secondary-color);
+        margin-bottom: 0;
+    }
+    
+    .wallet-balance p {
+        font-size: 1.1rem;
+        color: #777;
+        margin-bottom: 0;
+    }
+    
+    .payment-options {
+        margin-bottom: 20px;
+    }
+    
+    .payment-method {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .payment-method:hover {
+        background-color: rgba(52, 152, 219, 0.05);
+        border-color: var(--primary-color);
+    }
+    
+    .payment-method.selected {
+        background-color: rgba(52, 152, 219, 0.1);
+        border-color: var(--primary-color);
+    }
+    
+    .payment-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(52, 152, 219, 0.1);
+        color: var(--primary-color);
+        border-radius: 5px;
+        margin-right: 15px;
+        font-size: 1.2rem;
+    }
+    
+    .payment-details {
+        flex-grow: 1;
+    }
+    
+    .payment-details h6 {
+        margin-bottom: 0;
+    }
+    
+    .payment-details p {
+        font-size: 0.85rem;
+        color: #777;
+        margin-bottom: 0;
+    }
+    
+    .amount-options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .amount-option {
+        padding: 10px;
+        text-align: center;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .amount-option:hover {
+        background-color: rgba(52, 152, 219, 0.05);
+        border-color: var(--primary-color);
+    }
+    
+    .amount-option.selected {
+        background-color: rgba(52, 152, 219, 0.1);
+        border-color: var(--primary-color);
+    }
+    
+    .custom-amount {
+        margin-top: 10px;
+    }
+    
+    .confirmation-details {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    
+    .confirmation-details p {
+        margin-bottom: 5px;
+    }
+    
+    .confirmation-details .detail-label {
+        font-weight: 500;
+        color: #555;
+    }
+    
+    .confirmation-details .detail-value {
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="fas fa-wallet me-2"></i>Top Up Wallet</h2>
+                <p class="mb-0">Tambah saldo ke wallet HealthMate Anda</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'patient_wallet' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>Kembali ke Wallet
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="topup-card card">
+                <div class="card-body p-4">
+                    <!-- Current Balance -->
+                    <div class="wallet-balance">
+                        <p>Saldo Saat Ini</p>
+                        <h3>Rp {{ wallet_balance|floatformat:0 }}</h3>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Payment Method -->
+                        <div class="mb-4">
+                            <label class="form-label">Metode Pembayaran</label>
+                            <div class="payment-options">
+                                <div class="payment-method selected" onclick="selectPaymentMethod(this, 'credit_card')">
+                                    <div class="payment-icon">
+                                        <i class="fas fa-credit-card"></i>
+                                    </div>
+                                    <div class="payment-details">
+                                        <h6>Kartu Kredit/Debit</h6>
+                                        <p>VISA, Mastercard, JCB</p>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="payment_method" id="creditCard" value="credit_card" checked>
+                                    </div>
+                                </div>
+                                
+                                <div class="payment-method" onclick="selectPaymentMethod(this, 'bank_transfer')">
+                                    <div class="payment-icon">
+                                        <i class="fas fa-university"></i>
+                                    </div>
+                                    <div class="payment-details">
+                                        <h6>Transfer Bank</h6>
+                                        <p>BCA, Mandiri, BNI, BRI</p>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="payment_method" id="bankTransfer" value="bank_transfer">
+                                    </div>
+                                </div>
+                                
+                                <div class="payment-method" onclick="selectPaymentMethod(this, 'e_wallet')">
+                                    <div class="payment-icon">
+                                        <i class="fas fa-mobile-alt"></i>
+                                    </div>
+                                    <div class="payment-details">
+                                        <h6>E-Wallet</h6>
+                                        <p>GoPay, OVO, DANA, LinkAja</p>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="payment_method" id="eWallet" value="e_wallet">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Amount -->
+                        <div class="mb-4">
+                            <label class="form-label">Jumlah Top Up</label>
+                            <div class="amount-options">
+                                <div class="amount-option" onclick="selectAmount(this, 50000)">Rp 50.000</div>
+                                <div class="amount-option" onclick="selectAmount(this, 100000)">Rp 100.000</div>
+                                <div class="amount-option" onclick="selectAmount(this, 200000)">Rp 200.000</div>
+                                <div class="amount-option" onclick="selectAmount(this, 500000)">Rp 500.000</div>
+                                <div class="amount-option" onclick="selectAmount(this, 1000000)">Rp 1.000.000</div>
+                                <div class="amount-option" onclick="selectAmount(this, 0)">Lainnya</div>
+                            </div>
+                            
+                            <div class="custom-amount" id="customAmountContainer" style="display: none;">
+                                <div class="input-group">
+                                    <span class="input-group-text">Rp</span>
+                                    <input type="number" class="form-control" id="customAmount" name="amount" min="10000" max="10000000" placeholder="Masukkan jumlah">
+                                </div>
+                                <div class="form-text">Minimal Rp 10.000, maksimal Rp 10.000.000</div>
+                            </div>
+                            
+                            <input type="hidden" id="selectedAmount" name="amount" value="">
+                        </div>
+                        
+                        <!-- PIN -->
+                        <div class="mb-4">
+                            <label for="pin" class="form-label">PIN Wallet</label>
+                            <input type="password" class="form-control" id="pin" name="pin" placeholder="Masukkan 6 digit PIN" maxlength="6" pattern="[0-9]{6}" required>
+                            <div class="form-text">Masukkan 6 digit PIN wallet Anda untuk konfirmasi</div>
+                        </div>
+                        
+                        <!-- Summary -->
+                        <div class="confirmation-details">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><span class="detail-label">Jumlah Top Up:</span> <span class="detail-value" id="summaryAmount">Rp 0</span></p>
+                                    <p><span class="detail-label">Biaya Layanan:</span> <span class="detail-value" id="summaryFee">Rp 0</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><span class="detail-label">Metode Pembayaran:</span> <span class="detail-value" id="summaryMethod">Kartu Kredit/Debit</span></p>
+                                    <p><span class="detail-label">Total Pembayaran:</span> <span class="detail-value" id="summaryTotal">Rp 0</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                            <label class="form-check-label" for="agreeTerms">
+                                Saya setuju dengan <a href="#">syarat dan ketentuan</a> untuk top up wallet
+                            </label>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-wallet me-2"></i>Top Up Sekarang
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function selectPaymentMethod(element, method) {
+        // Remove selected class from all payment methods
+        document.querySelectorAll('.payment-method').forEach(el => {
+            el.classList.remove('selected');
+        });
+        
+        // Add selected class to clicked element
+        element.classList.add('selected');
+        
+        // Check the radio button
+        document.querySelector(`input[value="${method}"]`).checked = true;
+        
+        // Update summary
+        document.getElementById('summaryMethod').textContent = element.querySelector('h6').textContent;
+        updateSummary();
+    }
+    
+    function selectAmount(element, amount) {
+        // Remove selected class from all amount options
+        document.querySelectorAll('.amount-option').forEach(el => {
+            el.classList.remove('selected');
+        });
+        
+        // Add selected class to clicked element
+        element.classList.add('selected');
+        
+        // Show/hide custom amount input
+        const customAmountContainer = document.getElementById('customAmountContainer');
+        if (amount === 0) {
+            customAmountContainer.style.display = 'block';
+            document.getElementById('customAmount').focus();
+            document.getElementById('selectedAmount').value = '';
+        } else {
+            customAmountContainer.style.display = 'none';
+            document.getElementById('selectedAmount').value = amount;
+            
+            // Update summary
+            updateSummary(amount);
+        }
+    }
+    
+    function updateSummary(amount) {
+        let selectedAmount = amount;
+        
+        // If no amount is provided (custom amount case)
+        if (!selectedAmount) {
+            const customAmountInput = document.getElementById('customAmount');
+            selectedAmount = customAmountInput.value ? parseInt(customAmountInput.value) : 0;
+        }
+        
+        // Calculate service fee (example: 1% of amount)
+        const fee = Math.ceil(selectedAmount * 0.01);
+        const total = selectedAmount + fee;
+        
+        // Update summary display
+        document.getElementById('summaryAmount').textContent = 'Rp ' + selectedAmount.toLocaleString('id-ID');
+        document.getElementById('summaryFee').textContent = 'Rp ' + fee.toLocaleString('id-ID');
+        document.getElementById('summaryTotal').textContent = 'Rp ' + total.toLocaleString('id-ID');
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        // Select first amount option by default
+        const firstAmountOption = document.querySelector('.amount-option');
+        if (firstAmountOption) {
+            selectAmount(firstAmountOption, 50000);
+        }
+        
+        // Update summary when custom amount changes
+        const customAmountInput = document.getElementById('customAmount');
+        customAmountInput.addEventListener('input', function() {
+            document.getElementById('selectedAmount').value = this.value;
+            updateSummary();
+        });
+    });
+</script>
+{% endblock %}

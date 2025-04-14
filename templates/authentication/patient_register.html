@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - HealthMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .register-section {
+        background: linear-gradient(rgba(52, 152, 219, 0.1), rgba(46, 204, 113, 0.1));
+        padding: 40px 0;
+    }
+    
+    .register-card {
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .register-card .card-header {
+        background-color: transparent;
+        border-bottom: none;
+        text-align: center;
+        padding-bottom: 0;
+    }
+    
+    .register-card .card-header h3 {
+        color: var(--primary-color);
+        font-weight: bold;
+    }
+    
+    .register-card .btn-primary {
+        width: 100%;
+        padding: 10px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .auth-icon {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 15px;
+    }
+    
+    .auth-links {
+        text-align: center;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="register-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+                <div class="card register-card">
+                    <div class="card-header">
+                        <i class="fas fa-user-plus auth-icon"></i>
+                        <h3>Daftar Sebagai Pasien</h3>
+                        <p class="text-muted">Isi formulir di bawah untuk membuat akun baru</p>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="{{ form.first_name.id_for_label }}" class="form-label">Nama Depan</label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.first_name.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.last_name.id_for_label }}" class="form-label">Nama Belakang</label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.last_name.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="{{ form.phone.id_for_label }}" class="form-label">Nomor Telepon</label>
+                                    {{ form.phone }}
+                                    {% if form.phone.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.phone.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.birthdate.id_for_label }}" class="form-label">Tanggal Lahir</label>
+                                    {{ form.birthdate }}
+                                    {% if form.birthdate.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.birthdate.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="{{ form.sex.id_for_label }}" class="form-label">Jenis Kelamin</label>
+                                    {{ form.sex }}
+                                    {% if form.sex.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.sex.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.blood_type.id_for_label }}" class="form-label">Golongan Darah</label>
+                                    {{ form.blood_type }}
+                                    {% if form.blood_type.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.blood_type.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.address.id_for_label }}" class="form-label">Alamat</label>
+                                {{ form.address }}
+                                {% if form.address.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.address.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
+                                    {{ form.password }}
+                                    {% if form.password.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.password.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.confirm_password.id_for_label }}" class="form-label">Konfirmasi Password</label>
+                                    {{ form.confirm_password }}
+                                    {% if form.confirm_password.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.confirm_password.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="termsCheck" required>
+                                <label class="form-check-label" for="termsCheck">
+                                    Saya setuju dengan <a href="#">Syarat dan Ketentuan</a> serta <a href="#">Kebijakan Privasi</a>
+                                </label>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">Daftar</button>
+                            </div>
+                        </form>
+                        
+                        <div class="auth-links">
+                            <p>Sudah punya akun? <a href="{% url 'login' %}">Login Sekarang</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

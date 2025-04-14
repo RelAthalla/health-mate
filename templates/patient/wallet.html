@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+
+{% block title %}Wallet - HealthMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .wallet-card {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        position: relative;
+        margin-bottom: 30px;
+    }
+    
+    .wallet-card::before {
+        content: '';
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        top: -100px;
+        right: -50px;
+    }
+    
+    .wallet-card::after {
+        content: '';
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        bottom: -70px;
+        left: -70px;
+    }
+    
+    .wallet-content {
+        padding: 30px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .wallet-title {
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+        font-weight: 500;
+        opacity: 0.9;
+    }
+    
+    .wallet-balance {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    
+    .wallet-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .quick-action-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .quick-action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .quick-action-icon {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+    }
+    
+    .quick-action-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .quick-action-description {
+        font-size: 0.9rem;
+        color: #777;
+    }
+    
+    .transaction-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .transaction-header {
+        padding: 15px 20px;
+        background-color: rgba(52, 152, 219, 0.1);
+        border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+    }
+    
+    .transaction-header h5 {
+        margin-bottom: 0;
+        color: var(--primary-color);
+    }
+    
+    .transaction-list {
+        padding: 0;
+    }
+    
+    .transaction-item {
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .transaction-item:last-child {
+        border-bottom: none;
+    }
+    
+    .transaction-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+    
+    .transaction-icon.credit {
+        background-color: rgba(46, 204, 113, 0.1);
+        color: #2ecc71;
+    }
+    
+    .transaction-icon.debit {
+        background-color: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+    }
+    
+    .transaction-details {
+        flex-grow: 1;
+    }
+    
+    .transaction-title {
+        font-weight: 500;
+        margin-bottom: 3px;
+    }
+    
+    .transaction-date {
+        font-size: 0.85rem;
+        color: #777;
+    }
+    
+    .transaction-amount {
+        font-weight: 600;
+    }
+    
+    .transaction-amount.credit {
+        color: #2ecc71;
+    }
+    
+    .transaction-amount.debit {
+        color: #e74c3c;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 30px;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #ddd;
+        margin-bottom: 15px;
+    }
+    
+    .empty-state h5 {
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .empty-state p {
+        color: #777;
+        margin-bottom: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="fas fa-wallet me-2"></i>HealthMate Wallet</h2>
+                <p class="mb-0">Kelola saldo dan transaksi Anda</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'patient_dashboard' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>Kembali ke Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Wallet Card -->
+    <div class="wallet-card">
+        <div class="wallet-content">
+            <div class="wallet-title">Saldo Saat Ini</div>
+            <div class="wallet-balance">Rp {{ wallet_balance|floatformat:0 }}</div>
+            <div class="wallet-actions">
+                <a href="{% url 'topup_wallet' %}" class="btn btn-light">
+                    <i class="fas fa-plus me-2"></i>Top Up
+                </a>
+                <a href="{% url 'update_wallet_pin' %}" class="btn btn-outline-light">
+                    <i class="fas fa-key me-2"></i>Ubah PIN
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <h4 class="mb-3">Quick Actions</h4>
+    <div class="quick-actions">
+        <div class="quick-action-card">
+            <div class="quick-action-icon">
+                <i class="fas fa-plus-circle"></i>
+            </div>
+            <div class="quick-action-title">Top Up</div>
+            <div class="quick-action-description">Tambah saldo ke wallet Anda</div>
+            <a href="{% url 'topup_wallet' %}" class="btn btn-primary btn-sm mt-3">Top Up</a>
+        </div>
+        
+        <div class="quick-action-card">
+            <div class="quick-action-icon">
+                <i class="fas fa-key"></i>
+            </div>
+            <div class="quick-action-title">Ubah PIN</div>
+            <div class="quick-action-description">Ganti PIN wallet Anda</div>
+            <a href="{% url 'update_wallet_pin' %}" class="btn btn-primary btn-sm mt-3">Ubah PIN</a>
+        </div>
+        
+        <div class="quick-action-card">
+            <div class="quick-action-icon">
+                <i class="fas fa-file-invoice"></i>
+            </div>
+            <div class="quick-action-title">Lihat Tagihan</div>
+            <div class="quick-action-description">Lihat semua tagihan Anda</div>
+            <a href="{% url 'patient_bills' %}" class="btn btn-primary btn-sm mt-3">Lihat Tagihan</a>
+        </div>
+        
+        <div class="quick-action-card">
+            <div class="quick-action-icon">
+                <i class="fas fa-history"></i>
+            </div>
+            <div class="quick-action-title">Riwayat Transaksi</div>
+            <div class="quick-action-description">Lihat semua transaksi Anda</div>
+            <a href="{% url 'patient_bills' %}" class="btn btn-primary btn-sm mt-3">Lihat Riwayat</a>
+        </div>
+    </div>
+    
+    <!-- Recent Transactions -->
+    <div class="transaction-card">
+        <div class="transaction-header">
+            <h5><i class="fas fa-exchange-alt me-2"></i>Transaksi Terbaru</h5>
+        </div>
+        
+        <div class="transaction-list">
+            {% if transactions %}
+                {% for transaction in transactions %}
+                    <div class="transaction-item">
+                        <div class="transaction-icon {% if transaction.amount > 0 %}credit{% else %}debit{% endif %}">
+                            {% if transaction.amount > 0 %}
+                                <i class="fas fa-arrow-down"></i>
+                            {% else %}
+                                <i class="fas fa-arrow-up"></i>
+                            {% endif %}
+                        </div>
+                        <div class="transaction-details">
+                            <div class="transaction-title">
+                                {% if transaction.amount > 0 %}
+                                    Top Up Wallet
+                                {% else %}
+                                    Pembayaran Konsultasi
+                                {% endif %}
+                            </div>
+                            <div class="transaction-date">
+                                {{ transaction.date|date:"d M Y" }} | {{ transaction.time|time:"H:i" }}
+                            </div>
+                        </div>
+                        <div class="transaction-amount {% if transaction.amount > 0 %}credit{% else %}debit{% endif %}">
+                            {% if transaction.amount > 0 %}
+                                +Rp {{ transaction.amount|floatformat:0 }}
+                            {% else %}
+                                -Rp {{ transaction.amount|floatformat:0 }}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-receipt"></i>
+                    <h5>Belum Ada Transaksi</h5>
+                    <p>Anda belum memiliki riwayat transaksi.</p>
+                    <a href="{% url 'topup_wallet' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Top Up Sekarang
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

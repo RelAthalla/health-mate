@@ -1,0 +1,384 @@
+{% extends 'base.html' %}
+
+{% block title %}Detail Pasien - HealthMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .patient-profile {
+        margin-bottom: 30px;
+    }
+    
+    .profile-card {
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .profile-header {
+        background-color: rgba(52, 152, 219, 0.1);
+        padding: 30px;
+        position: relative;
+    }
+    
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+    
+    .profile-info-section {
+        padding: 30px;
+    }
+    
+    .profile-info {
+        margin-bottom: 15px;
+    }
+    
+    .profile-info .label {
+        color: #777;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+    
+    .profile-info .value {
+        font-weight: 500;
+        margin-bottom: 0;
+    }
+    
+    .blood-type-badge {
+        background-color: #e74c3c;
+        color: white;
+        font-size: 1rem;
+        padding: 5px 10px;
+        border-radius: 5px;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+    }
+    
+    .tab-content {
+        padding: 20px 0;
+    }
+    
+    .appointment-item, .prescription-item, .bill-item {
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        padding: 15px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .appointment-item:hover, .prescription-item:hover, .bill-item:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .appointment-time, .prescription-date, .bill-date {
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+    
+    .summary-card {
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+        background-color: white;
+    }
+    
+    .summary-header {
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    
+    .summary-label {
+        color: #777;
+    }
+    
+    .summary-value {
+        font-weight: 500;
+    }
+    
+    .wallet-balance {
+        background-color: rgba(46, 204, 113, 0.1);
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .wallet-balance .wallet-amount {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--secondary-color);
+        margin-bottom: 5px;
+    }
+    
+    .action-buttons .btn {
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="fas fa-user-circle me-2"></i>Detail Pasien</h2>
+                <p class="mb-0">Informasi lengkap dan riwayat pasien</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'manage_patients' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>Kembali ke Daftar Pasien
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-4">
+            <!-- Patient Profile Card -->
+            <div class="patient-profile">
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="blood-type-badge">{{ patient.blood_type }}</div>
+                        <div class="profile-avatar">
+                            {{ patient.name|slice:":1" }}
+                        </div>
+                        <h4>{{ patient.name }}</h4>
+                        <p class="text-muted mb-0">ID: {{ patient.patient_id }}</p>
+                    </div>
+                    
+                    <div class="profile-info-section">
+                        <div class="profile-info">
+                            <p class="label">Jenis Kelamin</p>
+                            <p class="value">{{ patient.sex }}</p>
+                        </div>
+                        
+                        <div class="profile-info">
+                            <p class="label">Tanggal Lahir</p>
+                            <p class="value">{{ patient.birthdate|date:"d F Y" }}</p>
+                        </div>
+                        
+                        <div class="profile-info">
+                            <p class="label">No. Telepon</p>
+                            <p class="value">{{ patient.phone }}</p>
+                        </div>
+                        
+                        <div class="profile-info">
+                            <p class="label">Alamat</p>
+                            <p class="value">{{ patient.address }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Wallet Information -->
+            <div class="summary-card">
+                <div class="summary-header">
+                    <h5><i class="fas fa-wallet me-2"></i>Informasi Wallet</h5>
+                </div>
+                
+                <div class="wallet-balance">
+                    <p class="mb-0">Saldo Wallet</p>
+                    <div class="wallet-amount">Rp {{ patient.wallet_balance|floatformat:0 }}</div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-outline-primary w-100" disabled>
+                        <i class="fas fa-plus me-2"></i>Tambah Saldo
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Patient Summary -->
+            <div class="summary-card">
+                <div class="summary-header">
+                    <h5><i class="fas fa-chart-pie me-2"></i>Ringkasan Aktivitas</h5>
+                </div>
+                
+                <div class="summary-item">
+                    <span class="summary-label">Total Konsultasi</span>
+                    <span class="summary-value">{{ appointments|length }}</span>
+                </div>
+                
+                <div class="summary-item">
+                    <span class="summary-label">Total Resep</span>
+                    <span class="summary-value">{{ prescriptions|length }}</span>
+                </div>
+                
+                <div class="summary-item">
+                    <span class="summary-label">Total Tagihan</span>
+                    <span class="summary-value">{{ bills|length }}</span>
+                </div>
+                
+                <div class="summary-item">
+                    <span class="summary-label">Total Pembayaran</span>
+                    <span class="summary-value">Rp {{ bills|length|floatformat:0 }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column -->
+        <div class="col-lg-8">
+            <!-- Tabs Navigation -->
+            <ul class="nav nav-tabs mb-3" id="patientTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="appointments-tab" data-bs-toggle="tab" data-bs-target="#appointments" type="button" role="tab" aria-controls="appointments" aria-selected="true">
+                        <i class="fas fa-calendar-check me-2"></i>Riwayat Konsultasi
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="prescriptions-tab" data-bs-toggle="tab" data-bs-target="#prescriptions" type="button" role="tab" aria-controls="prescriptions" aria-selected="false">
+                        <i class="fas fa-prescription me-2"></i>Resep Obat
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="bills-tab" data-bs-toggle="tab" data-bs-target="#bills" type="button" role="tab" aria-controls="bills" aria-selected="false">
+                        <i class="fas fa-file-invoice me-2"></i>Tagihan
+                    </button>
+                </li>
+            </ul>
+            
+            <!-- Tabs Content -->
+            <div class="tab-content" id="patientTabContent">
+                <!-- Appointments Tab -->
+                <div class="tab-pane fade show active" id="appointments" role="tabpanel" aria-labelledby="appointments-tab">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>Riwayat Konsultasi</h5>
+                    </div>
+                    
+                    {% if appointments %}
+                        {% for appointment in appointments %}
+                            <div class="appointment-item">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <p class="appointment-time mb-0">
+                                            <i class="far fa-calendar me-1"></i> {{ appointment.date|date:"d M Y" }}<br>
+                                            <i class="far fa-clock me-1"></i> {{ appointment.time|time:"H:i" }}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="d-flex justify-content-between">
+                                            <h6>Konsultasi dengan Dr. {{ appointment.doctor_name }}</h6>
+                                            <span class="badge bg-success">Selesai</span>
+                                        </div>
+                                        <p class="text-muted mb-0">
+                                            Spesialisasi: {{ appointment.specialization }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            Tidak ada riwayat konsultasi.
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Prescriptions Tab -->
+                <div class="tab-pane fade" id="prescriptions" role="tabpanel" aria-labelledby="prescriptions-tab">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>Resep Obat</h5>
+                    </div>
+                    
+                    {% if prescriptions %}
+                        {% for prescription in prescriptions %}
+                            <div class="prescription-item">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <h6>Resep #{{ prescription.prescription_id }}</h6>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-2">
+                                        <p class="fw-bold mb-1">Obat</p>
+                                        <p>{{ prescription.medicine }}</p>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <p class="fw-bold mb-1">Instruksi</p>
+                                        <p class="mb-0">{{ prescription.advice }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            Tidak ada resep.
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Bills Tab -->
+                <div class="tab-pane fade" id="bills" role="tabpanel" aria-labelledby="bills-tab">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>Tagihan</h5>
+                    </div>
+                    
+                    {% if bills %}
+                        {% for bill in bills %}
+                            <div class="bill-item">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <p class="bill-date mb-0">
+                                            <i class="far fa-calendar me-1"></i> {{ bill.date|date:"d M Y" }}<br>
+                                            <i class="far fa-clock me-1"></i> {{ bill.time|time:"H:i" }}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Tagihan #{{ bill.bill_id }}</h6>
+                                        <p class="text-muted mb-0">
+                                            {% if bill.amount > 0 %}
+                                                Top Up Wallet
+                                            {% else %}
+                                                Pembayaran Konsultasi
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-3 text-end">
+                                        <p class="fw-bold mb-0 {% if bill.amount > 0 %}text-success{% else %}text-danger{% endif %}">
+                                            {% if bill.amount > 0 %}
+                                                +Rp {{ bill.amount|floatformat:0 }}
+                                            {% else %}
+                                                -Rp {{ bill.amount|abs|floatformat:0 }}
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            Tidak ada tagihan.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

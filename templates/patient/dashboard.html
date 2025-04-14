@@ -1,0 +1,383 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Pasien - HealthMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-welcome {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .dashboard-stats {
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-card i {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+    }
+    
+    .stat-card.primary {
+        background-color: rgba(52, 152, 219, 0.1);
+        color: var(--primary-color);
+    }
+    
+    .stat-card.success {
+        background-color: rgba(46, 204, 113, 0.1);
+        color: var(--secondary-color);
+    }
+    
+    .stat-card.warning {
+        background-color: rgba(243, 156, 18, 0.1);
+        color: var(--warning-color);
+    }
+    
+    .stat-card.danger {
+        background-color: rgba(231, 76, 60, 0.1);
+        color: var(--danger-color);
+    }
+    
+    .quick-actions .btn {
+        margin-bottom: 10px;
+        padding: 12px 20px;
+        border-radius: 10px;
+        text-align: left;
+        font-weight: 500;
+    }
+    
+    .quick-actions .btn i {
+        margin-right: 10px;
+    }
+    
+    .upcoming-appointments {
+        margin-bottom: 30px;
+    }
+    
+    .appointment-item {
+        border-left: 4px solid var(--primary-color);
+        padding: 15px;
+        margin-bottom: 15px;
+        background-color: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .appointment-item:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .appointment-item p {
+        margin-bottom: 5px;
+    }
+    
+    .appointment-time {
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+    
+    .appointment-doctor {
+        font-weight: bold;
+    }
+    
+    .health-tips {
+        background-color: rgba(46, 204, 113, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+    }
+    
+    .health-tips h4 {
+        color: var(--secondary-color);
+        margin-bottom: 15px;
+    }
+    
+    .health-tips ul {
+        padding-left: 20px;
+    }
+    
+    .health-tips li {
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Welcome Section -->
+    <div class="dashboard-welcome">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2>Selamat Datang, {{ patient.name }}!</h2>
+                <p>Kami harap Anda dalam keadaan sehat. Berikut adalah ringkasan kesehatan Anda.</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'patient_profile' %}" class="btn btn-light">
+                    <i class="fas fa-user-edit"></i> Edit Profil
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stats Section -->
+    <div class="row dashboard-stats">
+        <div class="col-md-3">
+            <div class="stat-card primary">
+                <i class="fas fa-calendar-check"></i>
+                <h3>{{ upcoming_appointments|length }}</h3>
+                <p>Jadwal Konsultasi</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card success">
+                <i class="fas fa-wallet"></i>
+                <h3>Rp {{ patient.wallet_balance|floatformat:0 }}</h3>
+                <p>Saldo Wallet</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card warning">
+                <i class="fas fa-pills"></i>
+                <h3>{{ prescriptions|length }}</h3>
+                <p>Resep Obat</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card danger">
+                <i class="fas fa-file-invoice"></i>
+                <h3>{{ bills|length }}</h3>
+                <p>Tagihan</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Upcoming Appointments -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Jadwal Konsultasi Mendatang</h5>
+                    <a href="{% url 'patient_appointments' %}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_appointments %}
+                        <div class="upcoming-appointments">
+                            {% for appointment in upcoming_appointments %}
+                                <div class="appointment-item">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <p class="appointment-time">
+                                                <i class="far fa-calendar"></i> {{ appointment.date|date:"d M Y" }}<br>
+                                                <i class="far fa-clock"></i> {{ appointment.time|time:"H:i" }}
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="appointment-doctor">{{ appointment.doctor_name }}</p>
+                                            <p>{{ appointment.specialization }}</p>
+                                        </div>
+                                        <div class="col-md-3 text-end">
+                                            <a href="{% url 'reschedule_appointment' appointment.appointment_id %}" class="btn btn-sm btn-outline-primary mb-1">
+                                                <i class="fas fa-calendar-alt"></i> Reschedule
+                                            </a>
+                                            <a href="{% url 'cancel_appointment' appointment.appointment_id %}" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-times"></i> Batalkan
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            Anda tidak memiliki jadwal konsultasi mendatang.
+                            <a href="{% url 'find_doctors' %}" class="alert-link">Buat janji dengan dokter sekarang</a>.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Recent Prescriptions -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Resep Terbaru</h5>
+                    <a href="{% url 'patient_prescriptions' %}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
+                </div>
+                <div class="card-body">
+                    {% if prescriptions %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Obat</th>
+                                        <th>Instruksi</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for prescription in prescriptions %}
+                                        <tr>
+                                            <td>#{{ prescription.prescription_id }}</td>
+                                            <td>{{ prescription.medicine|truncatechars:30 }}</td>
+                                            <td>{{ prescription.advice|truncatechars:30 }}</td>
+                                            <td>
+                                                <a href="{% url 'view_prescription' prescription.prescription_id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i> Lihat
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            Anda belum memiliki resep.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Recent Bills -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Tagihan Terbaru</h5>
+                    <a href="{% url 'patient_bills' %}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
+                </div>
+                <div class="card-body">
+                    {% if bills %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tanggal</th>
+                                        <th>Jumlah</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for bill in bills %}
+                                        <tr>
+                                            <td>#{{ bill.bill_id }}</td>
+                                            <td>{{ bill.date|date:"d M Y" }}</td>
+                                            <td>Rp {{ bill.amount|floatformat:0 }}</td>
+                                            <td>
+                                                <a href="{% url 'pay_bill' bill.bill_id %}" class="btn btn-sm btn-success">
+                                                    <i class="fas fa-credit-card"></i> Bayar
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            Anda tidak memiliki tagihan.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Aksi Cepat</h5>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions">
+                        <a href="{% url 'find_doctors' %}" class="btn btn-primary d-block">
+                            <i class="fas fa-user-md"></i> Cari Dokter
+                        </a>
+                        <a href="{% url 'book_appointment' %}" class="btn btn-success d-block">
+                            <i class="fas fa-calendar-plus"></i> Buat Janji
+                        </a>
+                        <a href="{% url 'patient_wallet' %}" class="btn btn-warning d-block">
+                            <i class="fas fa-wallet"></i> Top Up Wallet
+                        </a>
+                        <a href="{% url 'medical_history' %}" class="btn btn-info d-block">
+                            <i class="fas fa-notes-medical"></i> Riwayat Medis
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Profile Summary -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Profil Anda</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="avatar-placeholder bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 24px;">
+                                {{ patient.name|slice:":1" }}
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0">{{ patient.name }}</h5>
+                            <p class="text-muted mb-0">ID: {{ patient.patient_id }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted">No. Telepon</small>
+                        <p>{{ patient.phone }}</p>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted">Jenis Kelamin</small>
+                        <p>{{ patient.sex }}</p>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted">Golongan Darah</small>
+                        <p>{{ patient.blood_type }}</p>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted">Tanggal Lahir</small>
+                        <p>{{ patient.birthdate|date:"d F Y" }}</p>
+                    </div>
+                    
+                    <a href="{% url 'patient_profile' %}" class="btn btn-outline-primary btn-sm d-block mt-3">
+                        <i class="fas fa-pencil-alt"></i> Edit Profil
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Health Tips -->
+            <div class="health-tips">
+                <h4><i class="fas fa-lightbulb"></i> Tips Kesehatan Hari Ini</h4>
+                <ul>
+                    <li>Minum minimal 8 gelas air putih setiap hari</li>
+                    <li>Lakukan olahraga ringan 30 menit setiap hari</li>
+                    <li>Tidur 7-8 jam setiap malam untuk kesehatan optimal</li>
+                    <li>Konsumsi makanan sehat dan seimbang</li>
+                    <li>Kelola stres dengan meditasi atau aktivitas yang menenangkan</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

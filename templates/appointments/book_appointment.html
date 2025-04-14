@@ -1,0 +1,326 @@
+{% extends 'base.html' %}
+
+{% block title %}Buat Janji Konsultasi - HealthMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .appointment-card {
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .doctor-info {
+        background-color: rgba(52, 152, 219, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .doctor-info h5 {
+        color: var(--primary-color);
+        margin-bottom: 15px;
+    }
+    
+    .doctor-profile {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .doctor-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin-right: 20px;
+    }
+    
+    .doctor-details .name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .doctor-details .specialty {
+        color: var(--primary-color);
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+    
+    .doctor-details .experience {
+        color: #555;
+    }
+    
+    .badge-specialization {
+        background-color: #3498db;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .experience-badge {
+        background-color: #2ecc71;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .time-slots {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .time-slot {
+        padding: 10px;
+        text-align: center;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .time-slot:hover {
+        background-color: rgba(52, 152, 219, 0.1);
+        border-color: var(--primary-color);
+    }
+    
+    .time-slot.selected {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+    
+    .time-slot.unavailable {
+        background-color: #f8f9fa;
+        color: #aaa;
+        cursor: not-allowed;
+        border-color: #eee;
+    }
+    
+    .confirmation-section {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+    
+    .confirmation-details {
+        background-color: rgba(46, 204, 113, 0.1);
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    
+    .confirmation-details p {
+        margin-bottom: 5px;
+    }
+    
+    .confirmation-details .detail-label {
+        font-weight: 500;
+        color: #555;
+    }
+    
+    .confirmation-details .detail-value {
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="fas fa-calendar-plus me-2"></i>{% if is_reschedule %}Reschedule Konsultasi{% else %}Buat Janji Konsultasi{% endif %}</h2>
+                <p class="mb-0">{% if is_reschedule %}Ubah jadwal konsultasi Anda{% else %}Pilih waktu yang sesuai untuk konsultasi Anda{% endif %}</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                {% if is_reschedule %}
+                <a href="{% url 'patient_appointments' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>Kembali ke Jadwal
+                </a>
+                {% else %}
+                <a href="{% url 'find_doctors' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>Kembali ke Cari Dokter
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="appointment-card card">
+                <div class="card-body p-4">
+                    <!-- Doctor Information -->
+                    <div class="doctor-info">
+                        <h5><i class="fas fa-user-md me-2"></i>Informasi Dokter</h5>
+                        <div class="doctor-profile">
+                            <div class="doctor-avatar">
+                                {{ doctor.name|slice:":1" }}
+                            </div>
+                            <div class="doctor-details">
+                                <div class="name">Dr. {{ doctor.name }}</div>
+                                <div class="specialty">
+                                    <span class="badge-specialization">{{ doctor.specialization }}</span>
+                                </div>
+                                <div class="experience">
+                                    <span class="experience-badge">{{ doctor.experience }} Tahun Pengalaman</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Appointment Form -->
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.date.id_for_label }}" class="form-label">Pilih Tanggal</label>
+                            {{ form.date }}
+                            {% if form.date.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.date.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.time.id_for_label }}" class="form-label">Pilih Waktu</label>
+                            {{ form.time }}
+                            {% if form.time.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.time.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Or use custom time slots selector instead of dropdown -->
+                        <!-- <div class="mb-3">
+                            <label class="form-label">Pilih Waktu</label>
+                            <div class="time-slots">
+                                <div class="time-slot">09:00</div>
+                                <div class="time-slot">09:30</div>
+                                <div class="time-slot">10:00</div>
+                                <div class="time-slot">10:30</div>
+                                <div class="time-slot">11:00</div>
+                                <div class="time-slot">11:30</div>
+                                <div class="time-slot">13:00</div>
+                                <div class="time-slot selected">13:30</div>
+                                <div class="time-slot">14:00</div>
+                                <div class="time-slot">14:30</div>
+                                <div class="time-slot unavailable">15:00</div>
+                                <div class="time-slot">15:30</div>
+                            </div>
+                        </div> -->
+                        
+                        <div class="confirmation-section">
+                            <h5>Konfirmasi Jadwal</h5>
+                            <div class="confirmation-details">
+                                <p><span class="detail-label">Dokter:</span> <span class="detail-value">Dr. {{ doctor.name }}</span></p>
+                                <p><span class="detail-label">Spesialisasi:</span> <span class="detail-value">{{ doctor.specialization }}</span></p>
+                                <p><span class="detail-label">Biaya Konsultasi:</span> <span class="detail-value">Rp 100.000</span></p>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                                <label class="form-check-label" for="agreeTerms">
+                                    Saya setuju dengan <a href="#">syarat dan ketentuan</a> untuk konsultasi online
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end">
+                            <button type="button" class="btn btn-outline-secondary me-2" onclick="window.history.back();">
+                                Batal
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                {% if is_reschedule %}
+                                <i class="fas fa-calendar-alt me-2"></i>Reschedule Konsultasi
+                                {% else %}
+                                <i class="fas fa-calendar-check me-2"></i>Konfirmasi Jadwal
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+        const timeSelect = document.getElementById('{{ form.time.id_for_label }}');
+        
+        // When date changes, fetch available time slots
+        dateInput.addEventListener('change', function() {
+            const date = this.value;
+            const doctorId = '{{ doctor.doctor_id }}';
+            
+            if (date) {
+                fetch(`/appointments/api/available-slots/?doctor_id=${doctorId}&date=${date}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Clear existing options
+                        timeSelect.innerHTML = '';
+                        
+                        // Add default option
+                        const defaultOption = document.createElement('option');
+                        defaultOption.value = '';
+                        defaultOption.textContent = 'Pilih waktu';
+                        timeSelect.appendChild(defaultOption);
+                        
+                        // Add available time slots
+                        if (data.available_slots && data.available_slots.length > 0) {
+                            data.available_slots.forEach(slot => {
+                                const option = document.createElement('option');
+                                option.value = slot;
+                                
+                                // Convert 24h format to 12h format for display
+                                const timeParts = slot.split(':');
+                                const hour = parseInt(timeParts[0]);
+                                const minute = timeParts[1];
+                                const period = hour >= 12 ? 'PM' : 'AM';
+                                const displayHour = hour % 12 || 12;
+                                
+                                option.textContent = `${displayHour}:${minute} ${period}`;
+                                timeSelect.appendChild(option);
+                            });
+                        } else {
+                            const noSlotsOption = document.createElement('option');
+                            noSlotsOption.value = '';
+                            noSlotsOption.textContent = 'Tidak ada slot yang tersedia';
+                            noSlotsOption.disabled = true;
+                            timeSelect.appendChild(noSlotsOption);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching time slots:', error));
+            }
+        });
+    });
+</script>
+{% endblock %}

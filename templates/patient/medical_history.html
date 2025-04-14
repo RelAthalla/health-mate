@@ -1,0 +1,316 @@
+{% extends 'base.html' %}
+
+{% block title %}Riwayat Medis - HealthMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .profile-summary {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .profile-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .profile-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+    
+    .profile-name {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .profile-id {
+        color: #777;
+    }
+    
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 15px;
+    }
+    
+    .info-item {
+        background-color: #f9f9f9;
+        padding: 10px 15px;
+        border-radius: 5px;
+    }
+    
+    .info-label {
+        font-size: 0.85rem;
+        color: #777;
+        margin-bottom: 5px;
+    }
+    
+    .info-value {
+        font-weight: 500;
+    }
+    
+    .history-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .card-header {
+        background-color: rgba(52, 152, 219, 0.1);
+        padding: 15px 20px;
+        border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+    }
+    
+    .card-header h5 {
+        margin-bottom: 0;
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+    
+    .card-body {
+        padding: 20px;
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 5px;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background-color: #e0e0e0;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 30px;
+    }
+    
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -30px;
+        top: 5px;
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        border: 3px solid white;
+        box-shadow: 0 0 0 2px var(--primary-color);
+    }
+    
+    .timeline-date {
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--primary-color);
+    }
+    
+    .appointment-card, .prescription-card {
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        padding: 15px;
+    }
+    
+    .appointment-time, .prescription-id {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .appointment-doctor, .prescription-details {
+        margin-bottom: 0;
+    }
+    
+    .specialty-badge {
+        background-color: rgba(52, 152, 219, 0.1);
+        color: var(--primary-color);
+        border-radius: 20px;
+        padding: 2px 10px;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .empty-state i {
+        font-size: 2.5rem;
+        color: #ddd;
+        margin-bottom: 15px;
+    }
+    
+    .empty-state p {
+        color: #777;
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="fas fa-notes-medical me-2"></i>Riwayat Medis</h2>
+                <p class="mb-0">Lihat riwayat medis dan konsultasi Anda</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'patient_dashboard' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>Kembali ke Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Profile Summary -->
+    <div class="profile-summary">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {{ patient.name|slice:":1" }}
+            </div>
+            <div>
+                <div class="profile-name">{{ patient.name }}</div>
+                <div class="profile-id">ID Pasien: {{ patient.patient_id }}</div>
+            </div>
+        </div>
+        
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Tanggal Lahir</div>
+                <div class="info-value">{{ patient.birthdate|date:"d F Y" }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Jenis Kelamin</div>
+                <div class="info-value">{{ patient.sex }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Golongan Darah</div>
+                <div class="info-value">{{ patient.blood_type }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">No. Telepon</div>
+                <div class="info-value">{{ patient.phone }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Appointments History -->
+        <div class="col-lg-6">
+            <div class="history-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-calendar-check me-2"></i>Riwayat Konsultasi</h5>
+                </div>
+                <div class="card-body">
+                    {% if appointments %}
+                        <div class="timeline">
+                            {% for appointment in appointments %}
+                                <div class="timeline-item">
+                                    <div class="timeline-date">{{ appointment.date|date:"d F Y" }}</div>
+                                    <div class="appointment-card">
+                                        <div class="appointment-time">{{ appointment.time|time:"H:i" }} WIB</div>
+                                        <div class="appointment-doctor">
+                                            Dr. {{ appointment.doctor_name }}
+                                            <span class="specialty-badge">{{ appointment.specialization }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times"></i>
+                            <p>Belum ada riwayat konsultasi</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Prescriptions History -->
+        <div class="col-lg-6">
+            <div class="history-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-prescription me-2"></i>Riwayat Resep</h5>
+                </div>
+                <div class="card-body">
+                    {% if prescriptions %}
+                        <div class="timeline">
+                            {% for prescription in prescriptions %}
+                                <div class="timeline-item">
+                                    <div class="timeline-date">{% now "d F Y" %}</div>
+                                    <div class="prescription-card">
+                                        <div class="prescription-id">Resep #{{ prescription.prescription_id }}</div>
+                                        <div class="prescription-details">
+                                            <strong>Obat:</strong> {{ prescription.medicine|truncatechars:50 }}
+                                        </div>
+                                        <div class="mt-2">
+                                            <a href="{% url 'view_prescription' prescription.prescription_id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye me-1"></i> Lihat Detail
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-prescription-bottle-alt"></i>
+                            <p>Belum ada riwayat resep</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Medical Notes (Example) -->
+    <div class="history-card">
+        <div class="card-header">
+            <h5><i class="fas fa-clipboard-list me-2"></i>Catatan Medis</h5>
+        </div>
+        <div class="card-body">
+            <div class="empty-state">
+                <i class="fas fa-clipboard"></i>
+                <p>Belum ada catatan medis</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}Detail Resep - HealthMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .prescription-card {
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .prescription-header {
+        background-color: rgba(52, 152, 219, 0.1);
+        padding: 20px;
+        border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+    }
+    
+    .prescription-id {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+    
+    .prescription-content {
+        padding: 30px;
+    }
+    
+    .section-title {
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+    }
+    
+    .medicine-section, .advice-section {
+        margin-bottom: 30px;
+    }
+    
+    .medicine-content, .advice-content {
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 5px;
+        white-space: pre-line;
+    }
+    
+    .actions-section {
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .prescription-card {
+            box-shadow: none;
+            border: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="page-header no-print">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="fas fa-prescription me-2"></i>Detail Resep</h2>
+                <p class="mb-0">Informasi lengkap resep obat untuk pasien</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'patient_prescriptions' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>Kembali ke Daftar Resep
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="prescription-card card">
+                <div class="prescription-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="prescription-id">Resep #{{ prescription.prescription_id }}</div>
+                            <div class="text-muted">Dibuat pada: {% now "d F Y H:i" %}</div>
+                        </div>
+                        <div class="col-md-6 text-md-end no-print">
+                            <a href="{% url 'download_prescription' prescription.prescription_id %}" class="btn btn-primary">
+                                <i class="fas fa-download me-2"></i>Unduh PDF
+                            </a>
+                            <button onclick="window.print()" class="btn btn-outline-secondary ms-2">
+                                <i class="fas fa-print me-2"></i>Cetak
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="prescription-content">
+                    <!-- Patient Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Informasi Pasien</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Nama</strong></td>
+                                    <td>{{ prescription.patient_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>ID Pasien</strong></td>
+                                    <td>{{ prescription.patient_id }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Informasi Resep</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>ID Resep</strong></td>
+                                    <td>#{{ prescription.prescription_id }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tanggal</strong></td>
+                                    <td>{% now "d F Y" %}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Medicine Section -->
+                    <div class="medicine-section">
+                        <h5 class="section-title">Obat</h5>
+                        <div class="medicine-content">
+                            {{ prescription.medicine }}
+                        </div>
+                    </div>
+                    
+                    <!-- Advice Section -->
+                    <div class="advice-section">
+                        <h5 class="section-title">Instruksi / Saran</h5>
+                        <div class="advice-content">
+                            {{ prescription.advice }}
+                        </div>
+                    </div>
+                    
+                    <!-- Note -->
+                    <div class="note mt-4">
+                        <p><small class="text-muted"><i class="fas fa-info-circle me-1"></i> Resep ini berlaku selama 30 hari sejak tanggal dikeluarkan.</small></p>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="actions-section no-print">
+                        <a href="{% url 'patient_prescriptions' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Kembali
+                        </a>
+                        <button onclick="window.print()" class="btn btn-primary">
+                            <i class="fas fa-print me-2"></i>Cetak Resep
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,296 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Dokter - HealthMate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-welcome {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .dashboard-stats {
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-card i {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+    }
+    
+    .stat-card.primary {
+        background-color: rgba(52, 152, 219, 0.1);
+        color: var(--primary-color);
+    }
+    
+    .stat-card.success {
+        background-color: rgba(46, 204, 113, 0.1);
+        color: var(--secondary-color);
+    }
+    
+    .stat-card.warning {
+        background-color: rgba(243, 156, 18, 0.1);
+        color: var(--warning-color);
+    }
+    
+    .stat-card.danger {
+        background-color: rgba(231, 76, 60, 0.1);
+        color: var(--danger-color);
+    }
+    
+    .quick-actions .btn {
+        margin-bottom: 10px;
+        padding: 12px 20px;
+        border-radius: 10px;
+        text-align: left;
+        font-weight: 500;
+    }
+    
+    .quick-actions .btn i {
+        margin-right: 10px;
+    }
+    
+    .appointment-item {
+        border-left: 4px solid var(--primary-color);
+        padding: 15px;
+        margin-bottom: 15px;
+        background-color: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .appointment-item:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .appointment-item p {
+        margin-bottom: 5px;
+    }
+    
+    .appointment-time {
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+    
+    .appointment-patient {
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Welcome Section -->
+    <div class="dashboard-welcome">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2>Selamat Datang, {{ doctor.name }}!</h2>
+                <p>Anda memiliki {{ today_count }} konsultasi hari ini. Lihat jadwal Anda di bawah.</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'doctor_profile' %}" class="btn btn-light">
+                    <i class="fas fa-user-edit"></i> Edit Profil
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stats Section -->
+    <div class="row dashboard-stats">
+        <div class="col-md-3">
+            <div class="stat-card primary">
+                <i class="fas fa-calendar-check"></i>
+                <h3>{{ today_count }}</h3>
+                <p>Konsultasi Hari Ini</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card success">
+                <i class="fas fa-users"></i>
+                <h3>{{ total_count }}</h3>
+                <p>Total Konsultasi</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card warning">
+                <i class="fas fa-stethoscope"></i>
+                <h3>{{ doctor.experience }}</h3>
+                <p>Tahun Pengalaman</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card danger">
+                <i class="fas fa-user-md"></i>
+                <h3>{{ doctor.specialization }}</h3>
+                <p>Spesialisasi</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Upcoming Appointments -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Jadwal Konsultasi Mendatang</h5>
+                    <a href="{% url 'doctor_appointments' %}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_appointments %}
+                        <div class="upcoming-appointments">
+                            {% for appointment in upcoming_appointments %}
+                                <div class="appointment-item">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <p class="appointment-time">
+                                                <i class="far fa-calendar"></i> {{ appointment.date|date:"d M Y" }}<br>
+                                                <i class="far fa-clock"></i> {{ appointment.time|time:"H:i" }}
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="appointment-patient">{{ appointment.patient_name }}</p>
+                                        </div>
+                                        <div class="col-md-3 text-end">
+                                            <a href="{% url 'doctor_patient_detail' appointment.patient_id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i> Detail Pasien
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            Anda tidak memiliki jadwal konsultasi mendatang.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- This Week's Schedule -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Jadwal Minggu Ini</h5>
+                    <a href="{% url 'doctor_schedule' %}" class="btn btn-sm btn-outline-primary">Lihat Jadwal Lengkap</a>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_appointments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>Waktu</th>
+                                        <th>Pasien</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in upcoming_appointments %}
+                                        <tr>
+                                            <td>{{ appointment.date|date:"d M Y" }}</td>
+                                            <td>{{ appointment.time|time:"H:i" }}</td>
+                                            <td>{{ appointment.patient_name }}</td>
+                                            <td>
+                                                <span class="badge bg-primary">Upcoming</span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            Tidak ada jadwal konsultasi untuk minggu ini.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Aksi Cepat</h5>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions">
+                        <a href="{% url 'doctor_patients' %}" class="btn btn-primary d-block">
+                            <i class="fas fa-users"></i> Lihat Pasien
+                        </a>
+                        <a href="{% url 'doctor_appointments' %}" class="btn btn-success d-block">
+                            <i class="fas fa-calendar-check"></i> Kelola Jadwal
+                        </a>
+                        <a href="{% url 'create_prescription_view' %}" class="btn btn-warning d-block">
+                            <i class="fas fa-prescription"></i> Buat Resep
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Doctor Profile Summary -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Profil Anda</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <div class="avatar-placeholder bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 24px;">
+                                {{ doctor.name|slice:":1" }}
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-0">Dr. {{ doctor.name }}</h5>
+                            <p class="text-muted mb-0">{{ doctor.specialization }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted">No. Telepon</small>
+                        <p>{{ doctor.phone }}</p>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted">Jenis Kelamin</small>
+                        <p>{{ doctor.sex }}</p>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted">Tanggal Lahir</small>
+                        <p>{{ doctor.birthdate|date:"d F Y" }}</p>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted">Pengalaman</small>
+                        <p>{{ doctor.experience }} Tahun</p>
+                    </div>
+                    
+                    <a href="{% url 'doctor_profile' %}" class="btn btn-outline-primary btn-sm d-block mt-3">
+                        <i class="fas fa-pencil-alt"></i> Edit Profil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
