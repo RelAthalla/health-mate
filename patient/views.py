@@ -7,7 +7,7 @@ from core.utils import (
     get_patient, update_patient, get_patient_appointments,
     get_patient_prescriptions, get_patient_bills,
     update_wallet_balance, get_all_doctors, get_doctors_by_specialization,
-    hash_password, dictfetchone
+    hash_password, dictfetchone, get_patient_bills_paid, get_patient_bills_topup, get_patient_bills_topup_or_paid
 )
 from .forms import PatientProfileForm, WalletPinForm, WalletTopUpForm
 
@@ -120,10 +120,7 @@ def find_doctors(request):
     specialization = request.GET.get('specialization', None)
     user_type = request.session.get('user_type')
     
-    if specialization:
-        doctors = get_doctors_by_specialization(specialization)
-    else:
-        doctors = get_all_doctors()
+    doctors = get_all_doctors()
     
     # Get all unique specializations for filter dropdown
     with connection.cursor() as cursor:
@@ -180,15 +177,15 @@ def wallet(request):
     """Patient wallet view"""
     patient_id = request.session.get('user_id')
     
-    # Get patient data for wallet balance
     patient = get_patient(patient_id)
     
     # Get recent bills/transactions
-    bills = get_patient_bills(patient_id)[:5]
+    transactions = get_patient_bills_topup_or_paid(patient_id)[:5]
+    transactions = transactions[::-1]
     
     context = {
         'wallet_balance': patient['wallet_balance'],
-        'transactions': bills
+        'transactions': transactions,
     }
     
     return render(request, 'patient/wallet.html', context)
@@ -231,6 +228,7 @@ def update_wallet_pin(request):
 def topup_wallet(request):
     """Top up wallet view"""
     patient_id = request.session.get('user_id')
+    patient = get_patient(patient_id)
     
     if request.method == 'POST':
         form = WalletTopUpForm(request.POST)
@@ -245,10 +243,10 @@ def topup_wallet(request):
                     cursor.execute(
                         """
                         INSERT INTO bill 
-                        (patient_id, date, time, amount)
-                        VALUES (%s, %s, %s, %s)
+                        (patient_id, date, time, amount, status)
+                        VALUES (%s, %s, %s, %s, %s)
                         """,
-                        [patient_id, datetime.now().date(), datetime.now().time(), amount]
+                        [patient_id, datetime.now().date(), datetime.now().time(), amount, "Topup"]
                     )
                 
                 messages.success(request, f'Successfully added {amount} to your wallet.')
@@ -258,8 +256,8 @@ def topup_wallet(request):
     else:
         form = WalletTopUpForm()
     
-    return render(request, 'patient/topup_wallet.html', {'form': form})
-
+    return render(request, 'patient/topup_wallet.html', {'form': form, 'patient': patient})
+    
 @patient_required
 def bills(request):
     """Patient bills view"""
@@ -270,6 +268,19 @@ def bills(request):
     
     return render(request, 'patient/bills.html', {
         'bills': bills
+    })
+    
+def bills_paid(request):
+    """Patient bills view"""
+    patient_id = request.session.get('user_id')
+    
+    # Get all bills
+    bills_paid = get_patient_bills_paid(patient_id)
+    topup = get_patient_bills_topup(patient_id)
+    
+    return render(request, 'patient/bills_paid.html', {
+        'bills_paid': bills_paid,
+        'topup': topup
     })
     
 @patient_required

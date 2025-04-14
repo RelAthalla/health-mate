@@ -180,7 +180,7 @@
                                 {{ doctor.name|slice:":1" }}
                             </div>
                             <div class="doctor-details">
-                                <div class="name">Dr. {{ doctor.name }}</div>
+                                <div class="name">{{ doctor.name }}</div>
                                 <div class="specialty">
                                     <span class="badge-specialization">{{ doctor.specialization }}</span>
                                 </div>
@@ -237,7 +237,7 @@
                         <div class="confirmation-section">
                             <h5>Konfirmasi Jadwal</h5>
                             <div class="confirmation-details">
-                                <p><span class="detail-label">Dokter:</span> <span class="detail-value">Dr. {{ doctor.name }}</span></p>
+                                <p><span class="detail-label">Dokter:</span> <span class="detail-value">{{ doctor.name }}</span></p>
                                 <p><span class="detail-label">Spesialisasi:</span> <span class="detail-value">{{ doctor.specialization }}</span></p>
                                 <p><span class="detail-label">Biaya Konsultasi:</span> <span class="detail-value">Rp 100.000</span></p>
                             </div>

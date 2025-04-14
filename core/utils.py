@@ -35,7 +35,7 @@ def authenticate_doctor(phone, password):
     # hashed_password = hash_password(password)
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT doctor_id, name FROM doctor WHERE phone = %s AND password = %s",
+            "SELECT doctor_id, CONCAT(first_name, ' ', last_name) AS name FROM doctor WHERE phone = %s AND password = %s",
             [phone, password]
         )
         return dictfetchone(cursor)
@@ -44,7 +44,7 @@ def authenticate_admin(phone, password):
     hashed_password = hash_password(password)
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT admin_id, name FROM admin WHERE phone = %s AND password = %s",
+            "SELECT admin_id, CONCAT(first_name, ' ', last_name) AS name FROM admin WHERE phone = %s AND password = %s",
             [phone, hashed_password]
         )
         return dictfetchone(cursor)
@@ -81,7 +81,7 @@ def update_patient(patient_id, data):
 def get_doctor(doctor_id):
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT * FROM doctor WHERE doctor_id = %s",
+            "SELECT CONCAT(first_name, ' ', last_name) AS name, specialization, experience FROM doctor WHERE doctor_id = %s",
             [doctor_id]
         )
         return dictfetchone(cursor)
@@ -89,14 +89,15 @@ def get_doctor(doctor_id):
 def get_all_doctors():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT doctor_id, name, specialization, experience FROM doctor"
+            "SELECT doctor_id, CONCAT(first_name, ' ', last_name) AS name, specialization, experience FROM doctor"
         )
+        
         return dictfetchall(cursor)
 
 def get_doctors_by_specialization(specialization):
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT doctor_id, name, specialization, experience FROM doctor WHERE specialization = %s",
+            "SELECT doctor_id, CONCAT(first_name, ' ', last_name) AS name, specialization, experience FROM doctor WHERE specialization = %s",
             [specialization]
         )
         return dictfetchall(cursor)
@@ -110,14 +111,11 @@ def get_admin(admin_id):
         )
         return dictfetchone(cursor)
 
-# Appointment related DB functions
-from django.db import connection
-
 def create_appointment(patient_id, doctor_id, date, time, appointment_fee):
     with connection.cursor() as cursor:
         # Get doctor details
         cursor.execute(
-            "SELECT name, specialization FROM doctor WHERE doctor_id = %s",
+            "SELECT CONCAT(first_name, ' ', last_name) AS name, specialization FROM doctor WHERE doctor_id = %s",
             [doctor_id]
         )
         doctor_info = dictfetchone(cursor)
@@ -129,7 +127,7 @@ def create_appointment(patient_id, doctor_id, date, time, appointment_fee):
         cursor.execute(
             """
             INSERT INTO appointment 
-            (patient_id, doctor_id, doctor_name, specialization, date, time)
+            (patient_id, doctor_id, name, specialization, date, time)
             VALUES (%s, %s, %s, %s, %s, %s)
             RETURNING appointment_id
             """,
@@ -220,10 +218,34 @@ def create_bill(patient_id, amount, date, time):
         result = cursor.fetchone()
         return result[0] if result else None
 
-def get_patient_bills(patient_id):
+def get_patient_bills_paid(patient_id):
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT * FROM bill WHERE patient_id = %s",
+            "SELECT * FROM bill WHERE patient_id = %s AND status = 'Paid'",
+            [patient_id]
+        )
+        return dictfetchall(cursor)
+
+def get_patient_bills(patient_id): 
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT * FROM bill WHERE patient_id = %s AND status = 'Unpaid'",
+            [patient_id]
+        )
+        return dictfetchall(cursor)
+    
+def get_patient_bills_topup_or_paid(patient_id): 
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT * FROM bill WHERE patient_id = %s AND (status = 'Topup' OR status = 'Paid') ORDER BY date DESC, time DESC",
+            [patient_id]
+        )
+        return dictfetchall(cursor)
+
+def get_patient_bills_topup(patient_id): 
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT * FROM bill WHERE patient_id = %s AND status = 'Topup'",
             [patient_id]
         )
         return dictfetchall(cursor)
