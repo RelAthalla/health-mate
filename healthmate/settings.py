@@ -1,6 +1,9 @@
 import os
 from pathlib import Path
 from decouple import config
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -74,6 +77,19 @@ DATABASES = {
         'HOST': config('DB_HOST'),
         'PORT': config('DB_PORT'),
     }
+}
+
+RECAPTCHA_SECRET_KEY = os.environ.get("RECAPTCHA_SECRET_KEY")
+
+FIREBASE_CREDENTIALS_PATH = os.environ.get('FIREBASE_CREDENTIALS_PATH')
+FIREBASE_CONFIG = {
+    'API_KEY': os.environ.get('FIREBASE_API_KEY'),
+    'AUTH_DOMAIN': os.environ.get('FIREBASE_AUTH_DOMAIN'),
+    'PROJECT_ID': os.environ.get('FIREBASE_PROJECT_ID'),
+    'STORAGE_BUCKET': os.environ.get('FIREBASE_STORAGE_BUCKET'),
+    'MESSAGING_SENDER_ID': os.environ.get('FIREBASE_MESSAGING_SENDER_ID'),
+    'APP_ID': os.environ.get('FIREBASE_APP_ID'),
+    'MEASUREMENT_ID': os.environ.get('FIREBASE_MEASUREMENT_ID')
 }
 
 # Password validation

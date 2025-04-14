@@ -226,7 +226,7 @@ def create_prescription_view(request, patient_id):
             else:
                 messages.error(request, "Failed to create prescription.")
     
-    return render(request, 'doctor/create_prescription.html', {'patient': patient})
+    return render(request, 'prescriptions/create_prescription.html', {'patient': patient})
 
 @doctor_required
 def schedule(request):

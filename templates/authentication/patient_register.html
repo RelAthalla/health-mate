@@ -49,6 +49,8 @@
 {% endblock %}
 
 {% block content %}
+<!-- Add the reCAPTCHA script -->
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <section class="register-section">
     <div class="container">
         <div class="row justify-content-center">
@@ -157,13 +159,16 @@
                                 </div>
                             </div>
                             
+                            <!-- reCAPTCHA Widget -->
+                            <div class="g-recaptcha"  data-sitekey="6LfQhBcrAAAAAIRDhfzitbuaVQxlnuHoNvJBQGFh"></div>
+        
                             <div class="mb-3 form-check">
                                 <input type="checkbox" class="form-check-input" id="termsCheck" required>
                                 <label class="form-check-label" for="termsCheck">
                                     Saya setuju dengan <a href="#">Syarat dan Ketentuan</a> serta <a href="#">Kebijakan Privasi</a>
                                 </label>
                             </div>
-                            
+
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary btn-lg">Daftar</button>
                             </div>

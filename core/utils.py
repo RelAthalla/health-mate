@@ -210,6 +210,15 @@ def get_patient_bills(patient_id):
         )
         return dictfetchall(cursor)
 
+def get_patient_phone(patient_id):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT phone FROM patient WHERE patient_id = %s",
+            [patient_id]
+        )
+        result = dictfetchone(cursor)
+        return result['phone'] if result else None
+
 def update_wallet_balance(patient_id, amount, wallet_pin):
     with connection.cursor() as cursor:
         # Verify wallet PIN

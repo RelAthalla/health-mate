@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Verify Your Phone Number</h4>
+                </div>
+                <div class="card-body">
+                    <p class="mb-4">Please verify your phone number to access your appointments.</p>
+                    
+                    <!-- Phone number display -->
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Verification code will be sent to: ***-***-{{ phone_number }}
+                    </div>
+                    
+                    <!-- Send code button -->
+                    <button id="send-code-btn" class="btn btn-primary btn-lg btn-block">
+                        Send Verification Code
+                    </button>
+                    
+                    <!-- Verification code input form (initially hidden) -->
+                    <div id="verification-form" class="mt-4" style="display:none;">
+                        <h5>Enter Verification Code</h5>
+                        <div class="form-group">
+                            <input type="text" id="verification-code" class="form-control form-control-lg" placeholder="Enter 6-digit code">
+                        </div>
+                        <button id="verify-code-btn" class="btn btn-success btn-lg btn-block mt-3">
+                            Verify Code
+                        </button>
+                    </div>
+                    
+                    <!-- Processing indicator -->
+                    <div id="processing" class="text-center my-3" style="display:none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Processing...</span>
+                        </div>
+                        <p>Verifying...</p>
+                    </div>
+                    
+                    <!-- Error message area (initially hidden) -->
+                    <div id="error-message" class="alert alert-danger mt-4" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Firebase App SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-auth-compat.js"></script>
+
+<script>
+    // Firebase config from settings
+    const firebaseConfig = {
+        apiKey: "{{ firebase_config.API_KEY }}",
+        authDomain: "{{ firebase_config.AUTH_DOMAIN }}",
+        projectId: "{{ firebase_config.PROJECT_ID }}",
+        storageBucket: "{{ firebase_config.STORAGE_BUCKET }}",
+        messagingSenderId: "{{ firebase_config.MESSAGING_SENDER_ID }}",
+        appId: "{{ firebase_config.APP_ID }}",
+        measurementId: "{{ firebase_config.MEASUREMENT_ID }}"
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    
+    // DOM elements
+    const sendCodeBtn = document.getElementById('send-code-btn');
+    const verificationForm = document.getElementById('verification-form');
+    const verificationCode = document.getElementById('verification-code');
+    const verifyCodeBtn = document.getElementById('verify-code-btn');
+    const errorMessage = document.getElementById('error-message');
+    const processingIndicator = document.getElementById('processing');
+    
+    // Function to show error message
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+        processingIndicator.style.display = 'none';
+    }
+    
+    // Function to hide error message
+    function hideError() {
+        errorMessage.style.display = 'none';
+    }
+    
+    // Function to show processing
+    function showProcessing() {
+        processingIndicator.style.display = 'block';
+        hideError();
+    }
+    
+    // Function to hide processing
+    function hideProcessing() {
+        processingIndicator.style.display = 'none';
+    }
+    
+    // Set up the reCAPTCHA verifier (invisible)
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('send-code-btn', {
+        'size': 'invisible', // Invisible reCAPTCHA
+        'callback': function(response) {
+            sendCodeBtn.disabled = false;
+        }
+    });
+    
+    // Send verification code (without reCAPTCHA)
+    sendCodeBtn.addEventListener('click', function() {
+        hideError();
+        showProcessing();
+        
+        // Get the full phone number from session
+        const phoneNumber = "{{ full_phone_number }}";
+        // Debugging: Print the phone number to the console
+        console.log("Phone number to verify:", phoneNumber);
+        
+        // Trigger the reCAPTCHA challenge (even though it's invisible)
+        window.recaptchaVerifier.render().then(function() {
+            firebase.auth().signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+                .then(function(confirmationResult) {
+                    // SMS sent successfully
+                    hideProcessing();
+                    
+                    // Store the confirmationResult object
+                    window.confirmationResult = confirmationResult;
+                    
+                    // Show the verification code input form
+                    verificationForm.style.display = 'block';
+                    sendCodeBtn.disabled = true;
+                })
+                .catch(function(error) {
+                    // Error sending SMS
+                    hideProcessing();
+                    showError("Error sending verification code: " + error.message);
+                });
+        });
+    });
+    
+    // Verify the code
+    verifyCodeBtn.addEventListener('click', function() {
+        const code = verificationCode.value.trim();
+        
+        if (!code) {
+            showError("Please enter the verification code");
+            return;
+        }
+        
+        showProcessing();
+        
+        // Confirm the verification code
+        window.confirmationResult.confirm(code)
+            .then(function(result) {
+                // User signed in successfully
+                const user = result.user;
+                
+                // Get the ID token
+                return user.getIdToken();
+            })
+            .then(function(idToken) {
+                // Send the token to your server for validation
+                return fetch("{% url 'verify_firebase_token' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: 'idToken=' + encodeURIComponent(idToken)
+                });
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideProcessing();
+                
+                if (data.success) {
+                    // Verification successful, redirect to appointments
+                    window.location.href = "{% url 'patient_appointments' %}";
+                } else {
+                    // Server validation failed
+                    showError("Verification failed: " + (data.error || "Unknown error"));
+                }
+            })  
+            .catch(function(error) {
+                // Invalid code or other error
+                hideProcessing();
+                showError("Verification failed: " + error.message);
+            });
+    });
+    
+    // Allow submitting verification code with Enter key
+    verificationCode.addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+            verifyCodeBtn.click();
+        }
+    });
+</script>
+{% endblock %}
