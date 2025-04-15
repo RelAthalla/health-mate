@@ -23,20 +23,20 @@ def hash_password(password):
 
 # User authentication functions
 def authenticate_patient(phone, password):
-    hashed_password = hash_password(password)
+    # hashed_password = hash_password(password)
     with connection.cursor() as cursor:
         cursor.execute(
             "SELECT patient_id, name FROM patient WHERE phone = %s AND password = %s",
-            [phone, hashed_password]
+            [phone, password]
         )
         return dictfetchone(cursor)
 
 def authenticate_doctor(phone, password):
-    hashed_password = hash_password(password)
+    # hashed_password = hash_password(password)
     with connection.cursor() as cursor:
         cursor.execute(
             "SELECT doctor_id, CONCAT(first_name, ' ', last_name) AS name FROM doctor WHERE phone = %s AND password = %s",
-            [phone, hashed_password]
+            [phone, password]
         )
         return dictfetchone(cursor)
 
@@ -81,7 +81,7 @@ def update_patient(patient_id, data):
 def get_doctor(doctor_id):
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT CONCAT(first_name, ' ', last_name) AS name, specialization, experience FROM doctor WHERE doctor_id = %s",
+            "SELECT *, CONCAT(first_name, ' ', last_name) AS name FROM doctor WHERE doctor_id = %s",
             [doctor_id]
         )
         return dictfetchone(cursor)
@@ -89,7 +89,7 @@ def get_doctor(doctor_id):
 def get_all_doctors():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT doctor_id, CONCAT(first_name, ' ', last_name) AS name, specialization, experience FROM doctor"
+            "SELECT *, CONCAT(first_name, ' ', last_name) AS name FROM doctor",
         )
         
         return dictfetchall(cursor)
@@ -97,7 +97,7 @@ def get_all_doctors():
 def get_doctors_by_specialization(specialization):
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT doctor_id, CONCAT(first_name, ' ', last_name) AS name, specialization, experience FROM doctor WHERE specialization = %s",
+            "SELECT *, CONCAT(first_name, ' ', last_name) AS name FROM doctor WHERE specialization = %s",
             [specialization]
         )
         return dictfetchall(cursor)
@@ -127,7 +127,7 @@ def create_appointment(patient_id, doctor_id, date, time, appointment_fee):
         cursor.execute(
             """
             INSERT INTO appointment 
-            (patient_id, doctor_id, name, specialization, date, time)
+            (patient_id, doctor_id, doctor_name, specialization, date, time)
             VALUES (%s, %s, %s, %s, %s, %s)
             RETURNING appointment_id
             """,
@@ -265,15 +265,6 @@ def get_patient_bills_topup(patient_id):
             [patient_id]
         )
         return dictfetchall(cursor)
-
-def get_patient_phone(patient_id):
-    with connection.cursor() as cursor:
-        cursor.execute(
-            "SELECT phone FROM patient WHERE patient_id = %s",
-            [patient_id]
-        )
-        result = dictfetchone(cursor)
-        return result['phone'] if result else None
 
 def get_patient_phone(patient_id):
     with connection.cursor() as cursor:

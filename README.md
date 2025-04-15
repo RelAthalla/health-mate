@@ -95,13 +95,14 @@ CREATE TABLE prescription (
     advice TEXT
 );
 
--- Create BILL table
 CREATE TABLE bill (
     bill_id SERIAL PRIMARY KEY,
     patient_id INTEGER REFERENCES patient(patient_id),
     date DATE,
     time TIME,
-    amount DECIMAL(10, 2)
+    amount NUMERIC(10, 2),
+    status VARCHAR(10) DEFAULT 'Unpaid',
+    appointment_id INTEGER REFERENCES appointment(appointment_id) ON DELETE CASCADE
 );
 
 -- Create AUDIT LOG table
@@ -119,34 +120,34 @@ CREATE TABLE IF NOT EXISTS audit_log (
 -- Dummy Data: ADMIN
 -- ====================
 INSERT INTO ADMIN (First_Name, Last_Name, Sex, Phone, Password, Birthdate) VALUES
-('Rina',   'Saputra', 'F', '081234567890',  -- Password: hashed versi 'admin123'
-    '$2y$10$abcdefghijklmnopqrstuv', '1980-05-12'),
+('Rina',   'Saputra', 'F', '081234567890', 
+    '8d2cb1dc9e018c72324103e5077586c625c3256e88f94544830c1a1619c1f0e4', '1980-05-12'), -- pass : Adm!n123Xy
 ('Budi',   'Hartono', 'M', '082345678901',
-    '$2y$10$mnopqrstuvabcdefghijkl', '1975-11-03'),
+    '476a210ae9f19014d9f3aa1986c52f08cb776f022861529fd31f6c7335a1767e', '1975-11-03'), -- pass : Secr3t#123A
 ('Siti',   'Kurnia',  'F', '083456789012',
-    '$2y$10$uvwxyzabcdef12345678', '1988-07-25');
+    '51cc18bcd87e3a451b7254cce59629ddeb6a0d351cc30f90074ae8f8abcb949c', '1988-07-25'); -- pass : 123$PowerAd
 
 -- ====================
 -- Dummy Data: PATIENT
 -- ====================
 INSERT INTO PATIENT (First_Name, Last_Name, Sex, Phone, Blood_Type, Password, Birthdate, Address) VALUES
 ('Andi',   'Wijaya',    'M', '081122334455', 'O', 
-    '$2y$10$abcd1234efgh5678ijkl', '1990-02-14', 'Jl. Melati No. 5, Jakarta'),
+    '06969f74536db93dd77da2e6481cdad0dc6880203353c34c07b96cff09374482', '1990-02-14', 'Jl. Melati No. 5, Jakarta'), -- pass : Pati456!ent
 ('Maya',   'Permata',   'F', '081133445566', 'A', 
-    '$2y$10$mnop1234qrst5678uvwx', '1992-08-30', 'Jl. Kenanga No. 12, Bandung'),
+    '01dd8976482db553a66aab03c7efdb844bf57f711a9c838f30d6ff47d49a425d', '1992-08-30', 'Jl. Kenanga No. 12, Bandung'), -- pass : 456$HeaLthy
 ('Dewi',   'Sari',      'F', '081144556677', 'B', 
-    '$2y$10$yzab1234cdef5678ghij', '1985-12-05', 'Jl. Mawar No. 8, Surabaya');
+    '8dc906ac27d93bc529b6c7d17e127eed06580f3db71a341f3b9b93624430f308', '1985-12-05', 'Jl. Mawar No. 8, Surabaya'); -- pass : MyP@ss456x
 
 -- ====================
 -- Dummy Data: DOCTOR
 -- ====================
 INSERT INTO DOCTOR (First_Name, Last_Name, Sex, Phone, Address, Password, Birthdate, Specialization, Experience) VALUES
 ('Dr. Agus', 'Prasetyo', 'M', '081155667788', 'Jl. Dokter No. 3, Jakarta', 
-    '$2y$10$1234abcd5678efghijkl', '1970-04-20', 'Cardiology', 15),
+    'cd2ee21fb82aa97efd7f1ddc9339273fd8d598ddb6843f1cddfd6471abd30e18', '1970-04-20', 'Cardiology', 15),  -- pass : Doc#789Med
 ('Dr. Lina', 'Setiawan', 'F', '081166778899', 'Jl. Sehat No. 7, Bandung', 
-    '$2y$10$5678mnop1234qrstuvwx', '1978-09-11', 'Dermatology', 10),
+    '124a0fdf0cd34aa8790b45a210c2b6223b7c6f6ac98fce9cc59cfcc1398f31a4', '1978-09-11', 'Dermatology', 10), -- pass : 789DrC@re!
 ('Dr. Eko',  'Santoso',  'M', '081177889900', 'Jl. Klinik No. 10, Surabaya', 
-    '$2y$10$9012yzab3456cdefghij', '1982-01-30', 'Pediatrics', 8);
+    '14abd7bcdd543db0d2a29feb308c461b74d1b763da625af9fe4a6a23761a0bd8', '1982-01-30', 'Pediatrics', 8); -- pass : Cl1n!c789a
 
 -- ====================
 -- Dummy Data: AUDIT LOG

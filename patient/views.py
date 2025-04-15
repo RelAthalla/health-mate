@@ -156,23 +156,6 @@ def appointments(request):
     patient_id = request.session.get('user_id')
     user_type = request.session.get('user_type')
     
-    # Check if OTP is verified
-    if not request.session.get('otp_verified'):
-        return redirect('request_otp')
-    
-    # Optional: Check if OTP verification has expired (e.g., after 24 hours)
-    verified_at = request.session.get('otp_verified_at')
-    current_time = datetime.now().timestamp()
-    verification_ttl = 86400  # 24 hours in seconds
-    
-    if verified_at and (current_time - verified_at > verification_ttl):
-        # Verification expired
-        request.session['otp_verified'] = False
-        if 'otp_verified_at' in request.session:
-            del request.session['otp_verified_at']
-        messages.info(request, "Your verification has expired. Please verify again.")
-        return redirect('request_otp')
-    
     # Get all appointments
     appointments = get_patient_appointments(patient_id)
     
